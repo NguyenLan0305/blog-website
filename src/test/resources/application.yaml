@@ -1,4 +1,3 @@
-
 server:
   port: 8080
 spring:
@@ -10,5 +9,3 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-  application:
-    name: blog-website
