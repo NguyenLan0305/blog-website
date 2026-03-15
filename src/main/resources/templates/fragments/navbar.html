@@ -1,0 +1,63 @@
+<!-- ══════════════════════════════════
+     FRAGMENT: navbar.html
+     Usage: include/inject into <body> before page content
+══════════════════════════════════ -->
+
+<th:block th:fragment="navbar">
+    <nav id="navbar" class="py-2">
+        <div class="container-xl d-flex align-items-center gap-2">
+
+            <div class="brand me-3" id="nav-brand">
+                <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                    <rect width="22" height="22" rx="6" fill="url(#lg)"/>
+                    <path d="M6 16V9l5-3 5 3v7" stroke="#fff" stroke-width="1.5" stroke-linecap="round"
+                          stroke-linejoin="round"/>
+                    <path d="M9 16v-4h4v4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"
+                          stroke-linejoin="round"/>
+                    <defs>
+                        <linearGradient id="lg" x1="0" y1="0" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#7c6ff7"/>
+                            <stop offset="1" stop-color="#9f7aea"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                Inkwell
+            </div>
+
+            <!-- Desktop links -->
+            <div class="d-none d-md-flex align-items-center gap-1 me-auto">
+                <button class="nav-lnk is-active" data-page="home">Home</button>
+                <button class="nav-lnk" data-page="categories">Categories</button>
+                <button class="nav-lnk" data-page="tags">Tags</button>
+            </div>
+
+            <!-- Auth area -->
+            <div class="ms-auto d-flex align-items-center gap-2" id="auth-area"></div>
+
+            <!-- Mobile hamburger -->
+            <button class="btn-login d-md-none ms-1" style="padding:.36rem .6rem;"
+                    data-bs-toggle="offcanvas" data-bs-target="#mob-menu">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="1" y1="4" x2="17" y2="4"/>
+                    <line x1="1" y1="9" x2="17" y2="9"/>
+                    <line x1="1" y1="14" x2="17" y2="14"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile offcanvas -->
+    <div class="offcanvas offcanvas-start" id="mob-menu" tabindex="-1">
+        <div class="offcanvas-header">
+            <span class="offcanvas-title">Inkwell</span>
+            <button class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            <button class="mb-nav-btn is-active" data-page="home" data-bs-dismiss="offcanvas">Home</button>
+            <button class="mb-nav-btn" data-page="categories" data-bs-dismiss="offcanvas">Categories</button>
+            <button class="mb-nav-btn" data-page="tags" data-bs-dismiss="offcanvas">Tags</button>
+            <div style="height:1px;background:var(--bd);margin:1.25rem 0;"></div>
+            <div id="mob-auth"></div>
+        </div>
+    </div>
+</th:block>
