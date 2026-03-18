@@ -14,9 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name="blogs",indexes = {
-        @Index(name = "idx_blog_slug", columnList = "slug")
-})
+@Table(name="blogs")
 public class Blog {
 
     @Id
@@ -40,7 +38,7 @@ public class Blog {
     int totalReads=0;
     LocalDateTime publishedAt;
     LocalDateTime updatedAt;
-
+    LocalDateTime createdAt;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
     User author;
@@ -62,7 +60,9 @@ public class Blog {
 
     @PrePersist
     void prePersist(){
-        if(publishedAt == null){
+        createdAt = LocalDateTime.now();
+
+        if(!draft && publishedAt == null){
             publishedAt = LocalDateTime.now();
         }
     }
