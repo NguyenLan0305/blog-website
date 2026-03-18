@@ -8,21 +8,21 @@ public class PageController {
 
     @GetMapping("/")
     public String homePage() {
-        return "/public/home-page";  // → templates/public/home-page.html
+        return "public/home-page";
     }
 
-    @GetMapping("/login")
-    public String loginPage() {
-        return "public/login";
+    @GetMapping("/home")
+    public String home() {
+        return "public/home-page";
     }
 
-    @GetMapping("/register")
-    public String registerPage() {
-        return "public/register";
-    }
+//    @GetMapping("/about")
+//    public String aboutPage() {
+//        return "public/about";
+//    }
 
-    @GetMapping("/forgot-password")
-    public String forgotPasswordPage() {
-        return "public/forgot-password";
-    }
+//    @GetMapping("/contact")
+//    public String contactPage() {
+//        return "public/contact";
+//    }
 }
