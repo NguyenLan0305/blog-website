@@ -14,10 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level= AccessLevel.PRIVATE)
-@Table(name="categories",indexes = {
-        @Index(name = "idx_blog_slug", columnList = "slug"),
-        @Index(name = "idx_blog_category", columnList = "category_id")
-})
+@Table(name="categories")
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

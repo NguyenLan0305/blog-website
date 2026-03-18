@@ -28,6 +28,7 @@ public class User {
     String bio;
     String avatarUrl;
     LocalDateTime createdAt;
+    Set<String> roles;
     @PrePersist
     void prePersist(){
        if(createdAt == null)
