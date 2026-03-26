@@ -19,4 +19,6 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
 
     // Đếm tổng số comment của 1 bài viết
     long countByBlogId(UUID blogId);
+
+
 }

@@ -14,9 +14,6 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name="blog_likes",uniqueConstraints = {
         @UniqueConstraint(columnNames = {"user_id","blog_id"})
-},indexes = {
-        @Index(name="idx_like_blog", columnList="blog_id"),
-        @Index(name="idx_like_user", columnList="user_id")
 })
 public class BlogLike {
 
@@ -30,6 +27,7 @@ public class BlogLike {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "blog_id",nullable = false)
+    @org.hibernate.annotations.OnDelete(action = org.hibernate.annotations.OnDeleteAction.CASCADE)
     Blog blog;
 
     LocalDateTime createdAt;

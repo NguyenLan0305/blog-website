@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,6 +23,8 @@ public class Category {
     UUID id;
     @Column(nullable = false, unique = true,length = 100)
     String name;
-    @Column(nullable = false, unique = true,length = 150)
-    String slug;
+
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    @Builder.Default
+    List<Blog> blogs = new ArrayList<>();
 }

@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 @Entity
@@ -24,18 +25,13 @@ public class Blog {
     @Column(nullable = false)
     String title;
 
-    @Column(nullable = false,unique = true,length=150)
-    String slug;
     String banner;
     String description;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "LONGTEXT")
     String content;
 
     boolean draft;
-    int totalLikes=0;
-    int totalComments=0;
-    int totalReads=0;
     LocalDateTime publishedAt;
     LocalDateTime updatedAt;
     LocalDateTime createdAt;
@@ -56,7 +52,8 @@ public class Blog {
                     @UniqueConstraint(columnNames = {"blog_id","tag_id"})
             }
     )
-    Set<Tag> tags;
+    @Builder.Default
+    Set<Tag> tags=new HashSet<>();
 
     @PrePersist
     void prePersist(){

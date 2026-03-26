@@ -3,7 +3,8 @@ package com.group.blog;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication(exclude = {org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration.class})
+// Đã xóa cái exclude đi rồi nhé!
+@SpringBootApplication
 public class BlogWebsiteApplication {
     public static void main(String[] args) {
         SpringApplication.run(BlogWebsiteApplication.class, args);

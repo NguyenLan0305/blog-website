@@ -1,11 +1,11 @@
 package com.group.blog.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import java.time.LocalDateTime;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Getter
@@ -28,7 +28,21 @@ public class User {
     String bio;
     String avatarUrl;
     LocalDateTime createdAt;
-    Set<String> roles;
+
+   @ElementCollection(fetch = FetchType.EAGER)
+   @CollectionTable(
+           name = "user_roles",
+           joinColumns = @JoinColumn(name = "user_id"),
+           uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "role"})
+   )
+   @Column(name = "role")
+   @Builder.Default
+   Set<String> roles = new HashSet<>();
+
+    @OneToMany(mappedBy = "author",cascade = CascadeType.ALL)
+            @Builder.Default
+    List<Blog> blogs=new ArrayList<>();
+
     @PrePersist
     void prePersist(){
        if(createdAt == null)

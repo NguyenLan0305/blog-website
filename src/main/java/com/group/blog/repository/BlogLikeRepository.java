@@ -15,5 +15,7 @@ import java.util.UUID;
 
         // Tìm record like cụ thể để xóa (khi người dùng bấm Unlike)
         void deleteByUserIdAndBlogId(UUID userId, UUID blogId);
+
+        long countByBlogId(UUID blogId);
     }
 
