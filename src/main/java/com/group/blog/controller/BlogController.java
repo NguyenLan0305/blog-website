@@ -64,4 +64,18 @@ public class BlogController {
                 .result("Bài viết đã được xóa thành công")
                 .build();
     }
+
+    @GetMapping("/category/{categoryId}")
+    public ApiResponse<List<BlogResponse>> getBlogsByCategory(@PathVariable UUID categoryId) {
+        return ApiResponse.<List<BlogResponse>>builder()
+                .result(blogService.getBlogsByCategory(categoryId))
+                .build();
+    }
+
+    @GetMapping("/tag/{tagId}")
+    public ApiResponse<List<BlogResponse>> getBlogsByTag(@PathVariable UUID tagId) {
+        return ApiResponse.<List<BlogResponse>>builder()
+                .result(blogService.getBlogsByTag(tagId))
+                .build();
+    }
 }

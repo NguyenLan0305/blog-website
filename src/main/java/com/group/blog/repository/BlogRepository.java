@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -23,4 +24,20 @@ public interface BlogRepository extends JpaRepository<Blog, UUID> {
             "FROM Blog b " +
             "ORDER BY b.createdAt DESC")
     List<Object[]> findAllBlogsWithCounts();
+
+    // Lấy bài viết theo Category ID (Kèm đếm view, like, comment chuẩn 3NF)
+    @Query("SELECT b, " +
+            "(SELECT COUNT(v) FROM BlogView v WHERE v.blog = b), " +
+            "(SELECT COUNT(l) FROM BlogLike l WHERE l.blog = b), " +
+            "(SELECT COUNT(c) FROM Comment c WHERE c.blog = b) " +
+            "FROM Blog b WHERE b.category.id = :categoryId")
+    List<Object[]> findBlogsByCategoryIdWithCounts(@Param("categoryId") UUID categoryId);
+
+    //  lọc theo Tag
+    @Query("SELECT b, " +
+            "(SELECT COUNT(v) FROM BlogView v WHERE v.blog = b), " +
+            "(SELECT COUNT(l) FROM BlogLike l WHERE l.blog = b), " +
+            "(SELECT COUNT(c) FROM Comment c WHERE c.blog = b) " +
+            "FROM Blog b JOIN b.tags t WHERE t.id = :tagId")
+    List<Object[]> findBlogsByTagIdWithCounts(@Param("tagId") UUID tagId);
 }

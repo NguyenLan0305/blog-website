@@ -4,42 +4,6 @@
  * Depends on: app.js (S, fmtDate, excerpt, initials, toast, callApi)
  */
 
-// ─────────────── 1. HÀM LỌC VÀ SẮP XẾP BÀI VIẾT ───────────────
-function getFiltered(allPosts) {
-    var res = allPosts.slice();
-
-    // Lọc theo Category ID (UUID)
-    if (S.cat) {
-        res = $.grep(res, function(p) {
-            return p.category && p.category.id === S.cat;
-        });
-    }
-
-    // Lọc theo Tag ID (UUID)
-    if (S.tag) {
-        res = $.grep(res, function(p) {
-            var hasTag = false;
-            if (p.tags) {
-                $.each(p.tags, function(_, t) {
-                    if (t.id === S.tag) hasTag = true;
-                });
-            }
-            return hasTag;
-        });
-    }
-
-    // Sắp xếp (Dựa trên biến S.sort, ví dụ: 'createdAt,desc')
-    var parts = S.sort.split(','), f = parts[0], d = parts[1];
-    res.sort(function(a, b){
-        var va = a[f] || '', vb = b[f] || '';
-        if (va < vb) return d === 'asc' ? -1 : 1;
-        if (va > vb) return d === 'asc' ?  1 : -1;
-        return 0;
-    });
-
-    return res;
-}
-
 // ─────────────── 2. HÀM XÂY DỰNG GIAO DIỆN THẺ BÀI VIẾT ───────────────
 function buildCard(p) {
     // Lấy tên Category từ object lồng nhau
@@ -117,26 +81,41 @@ function skeletons(n) {
 function renderPosts() {
     var $list = $('#post-list'), $cnt = $('#pcount');
 
-    // 1. Hiện Skeleton Loading ngay lập tức để User không phải chờ màn hình trắng
+    // 1. Hiện Skeleton Loading ngay lập tức
     $list.html(skeletons(3));
     $cnt.html('Đang tải bài viết...');
 
-    // 2. Gọi API lấy dữ liệu từ Backend Spring Boot
-    callApi('/blogs', 'GET').done(function(res) {
+    // 🔥 LOGIC CHUẨN XỊN: CHỌN ĐÚNG API ĐỂ GỌI
+    let apiUrl = '/blogs'; // Mặc định là lấy tất cả
+    if (S.cat) {
+        apiUrl = '/blogs/category/' + S.cat; // Nếu S.cat có giá trị, gọi API lấy theo Category
+    } else if (S.tag) {
+        apiUrl = '/blogs/tag/' + S.tag;      // Nếu S.tag có giá trị, gọi API lấy theo Tag
+    }
 
-        // Dữ liệu mảng trả về từ ApiResponse của bạn
-        var allPosts = res.result || res;
+    // 2. Gọi API tương ứng
+    callApi(apiUrl, 'GET').done(function(res) {
 
-        // 3. Tiến hành Lọc và Sắp xếp ngay dưới Client
-        var resFiltered = getFiltered(allPosts);
+        // Dữ liệu lúc này đã được lọc SẠCH SẼ từ Backend
+        var filteredPosts = res.result || res;
+
+        // 3. Xử lý Sắp xếp dưới Client (Vì số lượng mảng lúc này đã rất nhỏ, sort bằng JS sẽ chớp mắt là xong)
+        var parts = S.sort.split(','), f = parts[0], d = parts[1];
+        filteredPosts.sort(function(a, b){
+            var va = a[f] || '', vb = b[f] || '';
+            if (va < vb) return d === 'asc' ? -1 : 1;
+            if (va > vb) return d === 'asc' ?  1 : -1;
+            return 0;
+        });
+
         $list.empty();
 
-        // Cập nhật lại dòng thông báo trạng thái lọc (VD: Showing 5 articles)
-        var lbl = '<strong>' + resFiltered.length + '</strong> article' + (resFiltered.length !== 1 ? 's' : '');
+        // 4. Cập nhật dòng thông báo số lượng
+        var lbl = '<strong>' + filteredPosts.length + '</strong> article' + (filteredPosts.length !== 1 ? 's' : '');
         $cnt.html('Showing ' + lbl);
 
-        // Nếu không có bài viết nào khớp
-        if (resFiltered.length === 0) {
+        // 5. Nếu rỗng
+        if (filteredPosts.length === 0) {
             $list.html(
                 '<div class="empty"><div class="empty-g">✦</div>' +
                 '<p style="font-size:1rem;color:var(--t2);margin-bottom:.4rem;">Không tìm thấy bài viết nào!</p>' +
@@ -145,8 +124,8 @@ function renderPosts() {
             return;
         }
 
-        // 4. Render từng thẻ HTML nhét vào danh sách
-        $.each(resFiltered, function(_, p){
+        // 6. In ra giao diện
+        $.each(filteredPosts, function(_, p){
             $list.append(buildCard(p));
         });
 

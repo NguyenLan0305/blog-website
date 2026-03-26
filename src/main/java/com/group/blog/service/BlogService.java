@@ -146,6 +146,33 @@ public class BlogService {
         blogRepository.deleteById(id);
     }
 
+    // Trả về list Blog khi biết Category ID
+    public List<BlogResponse> getBlogsByCategory(UUID categoryId) {
+        List<Object[]> results = blogRepository.findBlogsByCategoryIdWithCounts(categoryId);
+        return results.stream().map(this::mapRowToBlogResponse).toList();
+    }
+
+    // Trả về list Blog khi biết Tag ID
+    public List<BlogResponse> getBlogsByTag(UUID tagId) {
+        List<Object[]> results = blogRepository.findBlogsByTagIdWithCounts(tagId);
+        return results.stream().map(this::mapRowToBlogResponse).toList();
+    }
+
+    // Tạo hàm Helper này để dùng chung cho gọn code, đỡ phải lặp lại đoạn Map dài ngoằng
+    private BlogResponse mapRowToBlogResponse(Object[] row) {
+        Blog blog = (Blog) row[0];
+        long viewCount = (long) row[1];
+        long likeCount = (long) row[2];
+        long commentCount = (long) row[3];
+
+        BlogResponse response = blogMapper.toBlogResponse(blog);
+        response.setSlug(SlugUtils.generateSlug(blog.getTitle()) + "-" + blog.getId());
+        response.setTotalReads((int) viewCount);
+        response.setTotalLikes((int) likeCount);
+        response.setTotalComments((int) commentCount);
+        return response;
+    }
+
     // ================= HELPER METHOD =================
     private BlogResponse enrichBlogResponse(Blog blog) {
         BlogResponse response = blogMapper.toBlogResponse(blog);
