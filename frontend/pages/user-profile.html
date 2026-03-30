@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Newsreader:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface": "#0b0e14",
+                        "outline-variant": "#424855",
+                        "surface-container": "#151a22",
+                        "tertiary-dim": "#bbe885",
+                        "primary-fixed": "#cbb6ff",
+                        "tertiary-fixed-dim": "#bbe885",
+                        "on-tertiary-fixed": "#2c4b00",
+                        "on-surface": "#e0e5f5",
+                        "on-primary-container": "#000000",
+                        "on-error": "#490013",
+                        "primary-dim": "#8455ef",
+                        "on-tertiary-container": "#3b5f08",
+                        "primary-fixed-dim": "#bfa5ff",
+                        "surface-container-low": "#10131b",
+                        "on-secondary-container": "#27aef2",
+                        "tertiary-container": "#c9f791",
+                        "surface-variant": "#202631",
+                        "surface-bright": "#262c39",
+                        "error": "#fd6f85",
+                        "secondary-dim": "#34b5fa",
+                        "surface-tint": "#ac8aff",
+                        "surface-container-lowest": "#000000",
+                        "outline": "#707583",
+                        "surface-dim": "#0b0e14",
+                        "on-tertiary": "#436713",
+                        "inverse-surface": "#f9f9ff",
+                        "on-secondary-fixed-variant": "#00628c",
+                        "inverse-primary": "#6e3bd7",
+                        "background": "#0b0e14",
+                        "tertiary-fixed": "#c9f791",
+                        "on-primary": "#280067",
+                        "on-primary-fixed-variant": "#5313bd",
+                        "error-dim": "#c8475d",
+                        "surface-container-highest": "#202631",
+                        "secondary": "#89ceff",
+                        "surface-container-high": "#1b202a",
+                        "secondary-fixed-dim": "#aadaff",
+                        "on-primary-fixed": "#31007b",
+                        "on-background": "#e0e5f5",
+                        "on-secondary": "#004564",
+                        "on-error-container": "#ff97a3",
+                        "error-container": "#8a1632",
+                        "on-surface-variant": "#a5abba",
+                        "primary": "#ac8aff",
+                        "tertiary": "#e7ffc5",
+                        "secondary-fixed": "#c9e6ff",
+                        "secondary-container": "#00293e",
+                        "on-tertiary-fixed-variant": "#446914",
+                        "inverse-on-surface": "#52555c",
+                        "on-secondary-fixed": "#004463",
+                        "primary-container": "#8f60fa"
+                    },
+                    fontFamily: {
+                        "headline": ["Newsreader", "serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #0b0e14;
+            color: #e0e5f5;
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased">
+<!-- TopAppBar -->
+<div id="navbar-container"></div>
+<!-- Main Content Area -->
+<main class="mt-20 p-6 md:p-12 min-h-screen bg-surface">
+    <div class="max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+            <!-- Left Column (Blog Posts) -->
+            <section class="lg:col-span-8 space-y-10">
+                <header class="space-y-2">
+                    <h1 class="font-serif italic text-4xl text-on-surface Newsreader tracking-tight">Blogs Published</h1>
+                    <div class="h-0.5 w-16 bg-primary"></div>
+                </header>
+                <div class="bg-surface-container-low rounded-xl p-12 md:p-20 flex flex-col items-center justify-center text-center border border-outline-variant/5">
+                    <div class="w-20 h-20 rounded-full bg-surface-variant flex items-center justify-center mb-6">
+                        <span class="material-symbols-outlined text-on-surface-variant text-4xl" data-icon="auto_stories">auto_stories</span>
+                    </div>
+                    <h3 class="font-serif text-2xl text-on-surface mb-2 Newsreader">No blogs published yet</h3>
+                    <p class="text-on-surface-variant max-w-xs font-body leading-relaxed">Your creative journey is just beginning. Start your first story today and let the world read your ink.</p>
+                    <button class="mt-8 px-8 py-3 rounded-full bg-gradient-to-r from-primary to-primary-container text-on-primary-container font-semibold hover:opacity-90 transition-opacity flex items-center gap-2">
+                        <span class="material-symbols-outlined" data-icon="add">add</span>
+                        Create New Post
+                    </button>
+                </div>
+            </section>
+            <!-- Right Column (User Profile Card) -->
+            <aside class="lg:col-span-4 lg:sticky lg:top-32 space-y-8">
+                <div class="rounded-xl relative overflow-hidden group">
+                    <!-- Decorative glow -->
+                    <div class="relative z-10 flex flex-col items-center">
+                        <div class="relative mb-6">
+                            <div class="w-32 h-32 rounded-full border-2 border-primary/30 p-1">
+                                <img alt="Profile Avatar" class="w-full h-full rounded-full object-cover" data-alt="Close-up portrait of a thoughtful man in editorial lighting with deep shadows and warm highlights, high-end photography style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAG5fBrHMukHYyAM6COTttasL9RdcUrPMTUci-JwujjNHsyWdgStmqb93mIzbT6SXj7pccfmmjFklNXwScavGp0Ggq1t_1gAepcwjXCbd9d5mPaXYSyHYSYxepv7yxwS-RGiLHbRZI46wzn-kuYbJYFQI5WEyS24kminRe3YAzOtqM1EDw8YXF1bigUw5DrjpHbKG6zsHtutE_Ujv-kTYbWYb_oDrqSm6vo_GA3dPLxMlZRQbof3Ug7uEwJOYhynA4bsj951Rsrw"/>
+                            </div>
+                        </div>
+                        <div class="text-center space-y-1 mb-6">
+                            <h2 class="font-serif text-3xl text-on-surface Newsreader">Parics</h2>
+                            <p class="text-primary font-mono text-sm tracking-tighter opacity-80">@caixxoongg</p>
+                        </div>
+                        <div class="flex items-center gap-4 py-4 px-6 rounded-full mb-8 border-outline-variant/10 divide-x-0"><div class="flex items-center gap-6"><div class="text-center"><span class="block font-serif text-xl Newsreader text-on-surface">0</span><span class="text-[10px] font-label uppercase tracking-widest text-on-surface-variant">Blogs</span></div><div class="text-primary/30">•</div><div class="text-center"><span class="block font-serif text-xl Newsreader text-on-surface">0</span><span class="text-[10px] font-label uppercase tracking-widest text-on-surface-variant">Reads</span></div></div></div>
+                        <div class="w-full space-y-6">
+                            <div class="space-y-2">
+                                <p class="text-xs font-label uppercase tracking-widest text-on-surface-variant opacity-60">Bio</p>
+                                <p class="font-body text-on-surface text-sm leading-relaxed italic border-l-2 border-primary/20 pl-4">
+                                    This is a test profile.
+                                </p>
+                            </div>
+                            <button class="w-full py-3 rounded-full border border-primary/30 text-primary hover:bg-primary/5 transition-colors duration-200 font-semibold flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+                                Edit Profile
+                            </button>
+                            <div class="pt-6 border-t border-outline-variant/10 flex items-center justify-center gap-2 text-on-surface-variant text-xs font-label">
+                                <span class="material-symbols-outlined text-xs" data-icon="calendar_today">calendar_today</span>
+                                Joined on 29 Sep 2023
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Editorial Quote / Aesthetic Card -->
+                <div class="p-8 rounded-xl from-surface-container-high to-surface-container-low border-outline-variant/5">
+                    <span class="material-symbols-outlined text-primary/40 text-4xl block mb-4" data-icon="format_quote">format_quote</span>
+                    <p class="font-serif italic text-lg text-on-surface-variant Newsreader leading-snug">
+                        "The ink flows where the spirit wanders. Your first words are waiting to be whispered onto the digital vellum."
+                    </p>
+                </div>
+            </aside>
+        </div>
+    </div>
+</main>
+<!-- Mobile Bottom Navigation (Visible on small screens) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-[#10131b] h-16 flex items-center justify-around z-50 px-4">
+    <a class="text-[#a5abba] flex flex-col items-center" href="#">
+        <span class="material-symbols-outlined" data-icon="article">article</span>
+        <span class="text-[10px] font-label">Blog</span>
+    </a>
+    <a class="text-[#a5abba] flex flex-col items-center" href="#">
+        <span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+        <span class="text-[10px] font-label">Write</span>
+    </a>
+    <a class="text-[#ac8aff] flex flex-col items-center" href="#">
+        <span class="material-symbols-outlined" data-icon="person">person</span>
+        <span class="text-[10px] font-label">Profile</span>
+    </a>
+</nav>
+</body></html>
