@@ -36,7 +36,7 @@ public class SecurityConfig {
               request.requestMatchers((HttpMethod.POST),PUBLIC_ENDPOINTS).permitAll()
                       .requestMatchers("/assets/**", "/css/**", "/js/**").permitAll()
                       .requestMatchers("/categories", "/tags", "/blogs", "/blogs/**").permitAll()
-                      .requestMatchers("/blogs/search", "/blogs/search/suggestions").permitAll()
+                      .requestMatchers("/blogs/search", "/blogs/search/suggestions","/blogs/filter").permitAll()
                       .requestMatchers(HttpMethod.GET,"/users").hasRole(Role.ADMIN.name())
                       .anyRequest().authenticated()
                );

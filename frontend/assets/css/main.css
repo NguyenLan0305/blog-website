@@ -20,6 +20,7 @@
     --bd-p:        rgba(124,111,247,.35);
     --r:           14px;
     --r-s:         8px;
+    --red: #ef4444;
 }
 
 *, *::before, *::after { box-sizing: border-box; }

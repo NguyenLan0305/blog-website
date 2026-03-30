@@ -94,4 +94,13 @@ public class BlogController {
                 .build();
     }
 
+
+    @GetMapping("/filter")
+    public ApiResponse<List<BlogResponse>> filterBlogs(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) UUID categoryId) {
+        return ApiResponse.<List<BlogResponse>>builder()
+                .result(blogService.filterBlogs(keyword, categoryId))
+                .build();
+    }
 }

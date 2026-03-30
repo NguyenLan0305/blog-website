@@ -1,5 +1,5 @@
 /**
- * sidebar.js (Phiên bản gọi API)
+ * sidebar.js (Phiên bản gọi API - Hỗ trợ Lọc Kép Combined Filtering)
  * Sidebar widgets: Categories (Stories from all interests) + Trending
  * Depends on: app.js (S, toast, callApi, excerpt), posts.js (renderPosts), filters.js (renderCatTabs)
  */
@@ -23,7 +23,7 @@ function renderSbCategories() {
             // Kiểm tra xem ID này có đang được chọn làm bộ lọc (S.cat) không
             var isActive = (S.cat === c.id) ? ' active' : '';
 
-            // Nội dung nút: Tên danh mục + Số lượng bài viết (postCount)
+            // Nội dung nút: Tên danh mục + Số lượng bài viết
             var btnHtml = c.name + '<span style="opacity: 0.6; font-size: 0.75rem; margin-left: 5px; font-family: Inter, sans-serif;">(' + (c.postCount || 0) + ')</span>';
 
             var $btn = $('<a href="javascript:void(0)" class="cat-pill' + isActive + '">')
@@ -34,20 +34,27 @@ function renderSbCategories() {
                     // Logic tắt/bật: Bấm lần 1 là chọn, bấm lần nữa là bỏ lọc
                     S.cat = (S.cat === c.id) ? null : c.id;
 
-                    // 🔥 CẬP NHẬT 1: Đổi URL trình duyệt đồng bộ với filters.js
-                    if (S.cat) {
-                        window.history.pushState({}, '', '/category/' + c.slug);
-                    } else {
-                        window.history.pushState({}, '', '/');
+                    // TUYỆT ĐỐI KHÔNG GHI S.keyword = null Ở ĐÂY (Để giữ lại từ khóa nếu đang search)
+
+                    // 🔥 CẬP NHẬT: Đổi URL trình duyệt thông minh (Hỗ trợ Lọc Kép)
+                    let newUrl = '/';
+                    let params = new URLSearchParams();
+
+                    if (S.keyword) params.append('q', S.keyword); // Nếu đang có search, nhét search vào URL
+                    if (S.cat) params.append('cat', S.cat);       // Nếu có danh mục, nhét danh mục vào URL
+
+                    if (params.toString() !== '') {
+                        newUrl += '?' + params.toString(); // Kết quả: /?q=html&cat=id-cua-programming
                     }
+                    window.history.pushState({}, '', newUrl);
 
                     // Render lại màu nút ở chính Sidebar này
                     renderSbCategories();
 
-                    // 🔥 CẬP NHẬT 2: Đồng bộ màu sắc với thanh Category nằm ngang ở giữa trang
+                    // Đồng bộ màu sắc với thanh Category nằm ngang ở giữa trang (nếu có file filters.js)
                     if (typeof renderCatTabs === 'function') renderCatTabs();
 
-                    // Render lại danh sách bài viết
+                    // Render lại danh sách bài viết (Nó sẽ tự động gọi API /filter gồm cả 2 thông số)
                     if (typeof renderPosts === 'function') renderPosts();
                 });
 
@@ -80,7 +87,7 @@ function renderSbTrending() {
             // Lấy tên Category từ DTO
             var catName = p.category ? p.category.name : 'Chưa phân loại';
 
-            // 🔥 CẬP NHẬT 3: Tính thời gian đọc an toàn với dữ liệu JSON của Editor.js
+            // Tính thời gian đọc an toàn với dữ liệu JSON của Editor.js
             var plainTextContent = excerpt(p.content, 99999);
             var readingTime = Math.ceil((plainTextContent.split(/\s+/).length || 1) / 200);
             if (readingTime === 0) readingTime = 1;
@@ -93,7 +100,7 @@ function renderSbTrending() {
                     '<div class="tr-meta">' + readingTime + ' min · ' + catName + '</div>' +
                     '</div>'
                 ).on('click', function(){
-                    // 🔥 CẬP NHẬT 4: Mở khóa chuyển trang chi tiết với URL chuẩn 3NF
+                    // Mở khóa chuyển trang chi tiết với URL chuẩn 3NF
                     window.location.href = '/post.html?id=' + p.slug;
                 })
             );

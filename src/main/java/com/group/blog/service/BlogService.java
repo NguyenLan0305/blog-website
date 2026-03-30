@@ -182,6 +182,25 @@ public class BlogService {
                 .toList();
     }
 
+    // Hàm xử lý lọc đa luồng
+    public List<BlogResponse> filterBlogs(String keyword, UUID categoryId) {
+        List<Object[]> results;
+
+        boolean hasKeyword = (keyword != null && !keyword.trim().isEmpty());
+        boolean hasCategory = (categoryId != null);
+
+        if (hasKeyword && hasCategory) {
+            results = blogRepository.findByKeywordAndCategoryIdWithCounts(keyword, categoryId);
+        } else if (hasKeyword) {
+            results = blogRepository.searchBlogsByKeywordWithCounts(keyword);
+        } else if (hasCategory) {
+            results = blogRepository.findBlogsByCategoryIdWithCounts(categoryId);
+        } else {
+            results = blogRepository.findAllBlogsWithCounts();
+        }
+
+        return results.stream().map(this::mapRowToBlogResponse).toList();
+    }
 
     // Tạo hàm Helper này để dùng chung cho gọn code, đỡ phải lặp lại đoạn Map dài ngoằng
     private BlogResponse mapRowToBlogResponse(Object[] row) {

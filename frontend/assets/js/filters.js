@@ -1,22 +1,22 @@
 /**
- * filters.js (Phiên bản đồng bộ API chuẩn)
+ * filters.js (Phiên bản đồng bộ API chuẩn - Hỗ trợ Lọc Kép)
  * Quản lý bộ lọc Category ngang và Tag dạng Chips
- * Depends on: app.js (S, callApi), posts.js (renderPosts), sidebar.js (renderSbTags)
+ * Depends on: app.js (S, callApi), posts.js (renderPosts), sidebar.js (renderSbCategories, renderSbTags)
  */
 
-// Khai báo biến toàn cục (thay thế cho data.js cũ)
+// Khai báo biến toàn cục
 var CATEGORIES = [];
 var TAGS = [];
 var TOTAL_POSTS = 0;
 
-// Hàm này sẽ được gọi lúc khởi tạo trang (thường đặt trong file init.js hoặc $(document).ready)
+// Hàm này sẽ được gọi lúc khởi tạo trang
 function fetchAndRenderFilters() {
 
     // 1. Gọi API lấy danh sách Category
     callApi('/categories', 'GET').done(function(res) {
         CATEGORIES = res.result || res;
 
-        // 🔥 Mẹo nhỏ: Cộng dồn số bài viết của từng danh mục để ra TỔNG SỐ BÀI (All Posts)
+        // Cộng dồn số bài viết của từng danh mục để ra TỔNG SỐ BÀI (All Posts)
         TOTAL_POSTS = 0;
         $.each(CATEGORIES, function(_, c) {
             TOTAL_POSTS += (c.postCount || 0);
@@ -30,6 +30,21 @@ function fetchAndRenderFilters() {
         TAGS = res.result || res;
         renderTagChips();
     });
+}
+
+// ─────────────── HÀM HỖ TRỢ ĐỔI URL THÔNG MINH ───────────────
+function updateUrlWithFilters() {
+    let newUrl = '/';
+    let params = new URLSearchParams();
+
+    if (S.keyword) params.append('q', S.keyword);
+    if (S.cat) params.append('cat', S.cat);
+    if (S.tag) params.append('tag', S.tag); // Nếu bạn muốn gộp cả Tag vào bộ lọc
+
+    if (params.toString() !== '') {
+        newUrl += '?' + params.toString();
+    }
+    window.history.pushState({}, '', newUrl);
 }
 
 // ─────────────── RENDER CATEGORY TABS ───────────────
@@ -46,8 +61,12 @@ function renderCatTabs() {
         $('<button class="cat-btn' + (!S.cat ? ' on' : '') + '">').html(
             'All Posts <span style="font-size:.68rem;opacity:.65;margin-left:.25rem;">(' + TOTAL_POSTS + ')</span>'
         ).on('click', function(){
-            S.cat = null; // Bỏ lọc Category
-            renderCatTabs(); // Đổi màu nút
+            S.cat = null; // Bỏ lọc Category (Nhưng vẫn giữ S.keyword nếu có)
+
+            updateUrlWithFilters(); // Đổi URL an toàn
+
+            renderCatTabs(); // Đổi màu nút ở thanh ngang
+            if (typeof renderSbCategories === 'function') renderSbCategories(); // Đồng bộ thanh Sidebar
             if (typeof renderPosts === 'function') renderPosts(); // Lọc lại danh sách bài
         })
     );
@@ -60,15 +79,10 @@ function renderCatTabs() {
             ).on('click', function(){
                 S.cat = (S.cat === c.id) ? null : c.id;
 
-                // 🔥 ĐỔI URL TRÌNH DUYỆT MÀ KHÔNG LOAD LẠI TRANG
-                if (S.cat) {
-                    // c.slug ở đây chính là chuỗi "lap-trinh-java-UUID" từ Backend trả về
-                    window.history.pushState({}, '', '/category/' + c.slug);
-                } else {
-                    window.history.pushState({}, '', '/'); // Trở về trang chủ
-                }
+                updateUrlWithFilters(); // Đổi URL an toàn không làm mất keyword
 
                 renderCatTabs();
+                if (typeof renderSbCategories === 'function') renderSbCategories(); // Đồng bộ thanh Sidebar
                 if (typeof renderPosts === 'function') renderPosts();
             })
         );
@@ -92,6 +106,8 @@ function renderTagChips() {
                 '<span style="font-size:.65rem;opacity:.6;margin-left:.2rem;">(' + (t.postCount || 0) + ')</span>'
             ).on('click', function(){
                 S.tag = (S.tag === t.id) ? null : t.id;
+
+                updateUrlWithFilters(); // Đổi URL an toàn
 
                 renderTagChips(); // Đổi màu thẻ ở filter
 

@@ -6,10 +6,8 @@
 
 // ─────────────── 1. HÀM XÂY DỰNG GIAO DIỆN THẺ BÀI VIẾT ───────────────
 function buildCard(p) {
-    // Lấy tên Category từ object lồng nhau
     var catName = p.category ? p.category.name : 'Chưa phân loại';
 
-    // Xây dựng danh sách Tags
     var tagsHtml = '';
     if (p.tags && p.tags.length > 0) {
         $.each(p.tags, function(_, t){
@@ -17,15 +15,11 @@ function buildCard(p) {
         });
     }
 
-    // Lấy tên Tác giả từ object UserResponse
     var authorName = p.author ? p.author.username : 'Anonymous';
 
-    // Xử lý Đoạn trích (Excerpt) an toàn với Editor.js JSON
-    // Nếu có description thì xài, không có thì nhờ app.js bóc tách JSON ra 200 ký tự Text thường
-    var plainTextContent = excerpt(p.content, 99999); // Lấy toàn bộ Text thô để đếm từ
+    var plainTextContent = excerpt(p.content, 99999);
     var postExcerpt = p.description ? p.description : excerpt(p.content, 200);
 
-    // Tính thời gian đọc chuẩn xác (1 phút ~ 200 chữ)
     var readingTime = Math.ceil((plainTextContent.split(/\s+/).length || 1) / 200);
     if (readingTime === 0) readingTime = 1;
 
@@ -45,7 +39,6 @@ function buildCard(p) {
         '<div class="pc-title">' + p.title + '</div>' +
         '<div class="pc-author"><span class="ac">' + initials(authorName) + '</span>' + authorName + '</div>' +
 
-        // Đoạn trích (Mô tả)
         '<p class="pc-exc">' + postExcerpt + '</p>' +
 
         '<div class="pc-foot">' +
@@ -55,7 +48,6 @@ function buildCard(p) {
         '</span>' +
         '</div>'
     ).on('click', function(){
-        // Kích hoạt chuyển trang (Routing) với URL Slug
         window.location.href = '/post.html?id=' + p.slug;
     });
 }
@@ -76,69 +68,112 @@ function skeletons(n) {
     return h;
 }
 
-// ─────────────── 3. HÀM CẬP NHẬT BANNER BỘ LỌC ───────────────
+// ─────────────── HÀM CẬP NHẬT BANNER BỘ LỌC (NÂNG CẤP) ───────────────
 function updateFilterBanner() {
     var $banner = $('#active-filter-banner');
-    var filterText = '';
+    var activeFiltersHtml = '';
 
-    // Kiểm tra xem người dùng đang lọc theo cái gì
     if (S.keyword) {
-        filterText = 'Search results for: <strong>"' + S.keyword + '"</strong>';
-    } else if (S.cat) {
-        filterText = 'Filtered by <strong>Category</strong>';
-    } else if (S.tag) {
-        filterText = 'Filtered by <strong>Tag</strong>';
+        activeFiltersHtml += `
+            <span class="badge bg-light text-dark border p-2 me-2 d-inline-flex align-items-center gap-2" style="font-size: 0.85rem;">
+                <span class="text-muted">Search:</span> <strong>${S.keyword}</strong>
+                <span class="btn-remove-filter" data-type="keyword" style="cursor:pointer; color: var(--red);">✖</span>
+            </span>`;
     }
 
-    // Nếu có bộ lọc, hiển thị Banner màu tím nhạt
-    if (filterText) {
+    if (S.cat) {
+        // 🔥 Lấy tên Category đang active từ biến toàn cục CATEGORIES (nếu có)
+        var activeCatName = 'Active';
+        if (typeof CATEGORIES !== 'undefined') {
+            var foundCat = CATEGORIES.find(c => c.id === S.cat);
+            if (foundCat) activeCatName = foundCat.name;
+        }
+
+        activeFiltersHtml += `
+            <span class="badge bg-light text-dark border p-2 me-2 d-inline-flex align-items-center gap-2" style="font-size: 0.85rem;">
+                <span class="text-muted">Category:</span> <strong>${activeCatName}</strong>
+                <span class="btn-remove-filter" data-type="cat" style="cursor:pointer; color: var(--red);">✖</span>
+            </span>`;
+    }
+
+    if (activeFiltersHtml !== '') {
         $banner.html(`
-            <div class="d-flex align-items-center justify-content-between p-3 rounded" style="background: rgba(124,111,247,0.08); border: 1px solid rgba(124,111,247,0.2);">
-                <div class="d-flex align-items-center" style="color: var(--t1); font-size: 0.95rem;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2" class="me-2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-                    <span>${filterText}</span>
+            <div class="d-flex align-items-center justify-content-between p-3 rounded mb-3" style="background: rgba(124,111,247,0.05); border: 1px dashed rgba(124,111,247,0.3);">
+                <div class="d-flex align-items-center flex-wrap">
+                    <span class="me-3" style="color: var(--t2); font-size: 0.9rem;">Active filters:</span>
+                    ${activeFiltersHtml}
                 </div>
-                <button class="btn btn-sm btn-clear-filter d-flex align-items-center gap-1" style="color: var(--purple); font-weight: 500; background: none; border: none; transition: 0.2s;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    Clear & View All
+                <button class="btn btn-sm btn-clear-filter text-muted" style="background: none; border: none; font-size: 0.85rem; text-decoration: underline;">
+                    Clear All
                 </button>
             </div>
         `).slideDown(200);
     } else {
-        // Nếu không có bộ lọc nào, giấu Banner đi
         $banner.slideUp(200);
     }
 }
 
-// ─────────────── 4. HÀM CHÍNH ĐỂ RENDER DANH SÁCH BÀI VIẾT ───────────────
+// Bắt sự kiện XÓA TỪNG BỘ LỌC
+$(document).on('click', '.btn-remove-filter', function() {
+    var type = $(this).data('type');
+
+    if (type === 'keyword') {
+        S.keyword = null;
+        $('#nav-search-input, #mob-search-input').val('');
+    } else if (type === 'cat') {
+        S.cat = null;
+    }
+
+    // Cập nhật lại URL bằng hàm ở filters.js (nếu có)
+    if (typeof updateUrlWithFilters === 'function') {
+        updateUrlWithFilters();
+    } else {
+        window.history.pushState({}, '', window.location.pathname);
+    }
+
+    // Cập nhật lại giao diện các nút
+    if (typeof renderCatTabs === 'function') renderCatTabs();
+    if (typeof renderSbCategories === 'function') renderSbCategories();
+
+    renderPosts();
+});
+
+// Bắt sự kiện XÓA TẤT CẢ (Clear All)
+$(document).on('click', '.btn-clear-filter', function() {
+    S.keyword = null; S.cat = null; S.tag = null;
+
+    $('#nav-search-input, #mob-search-input').val('');
+
+    if (typeof updateUrlWithFilters === 'function') {
+        updateUrlWithFilters();
+    } else {
+        window.history.pushState({}, '', window.location.pathname);
+    }
+
+    // Cập nhật lại giao diện các nút
+    if (typeof renderCatTabs === 'function') renderCatTabs();
+    if (typeof renderSbCategories === 'function') renderSbCategories();
+    if (typeof renderTags === 'function') renderTags();
+
+    renderPosts();
+});
+
+// ─────────────── HÀM CHÍNH ĐỂ RENDER DANH SÁCH BÀI VIẾT ───────────────
 function renderPosts() {
     var $list = $('#post-list'), $cnt = $('#pcount');
-
-    // 1. Hiện Skeleton Loading ngay lập tức
     $list.html(skeletons(3));
     $cnt.html('Đang tải bài viết...');
 
-    // 2. Cập nhật trạng thái hiển thị của Banner bộ lọc
     updateFilterBanner();
 
-    // 3. LOGIC CHUẨN XỊN: CHỌN ĐÚNG API ĐỂ GỌI
-    let apiUrl = '/blogs'; // Mặc định là lấy tất cả
-    if (S.keyword) { // Ưu tiên gọi API tìm kiếm nếu có từ khóa
-        apiUrl = '/blogs/search?keyword=' + encodeURIComponent(S.keyword);
-    }
-    else if (S.cat) {
-        apiUrl = '/blogs/category/' + S.cat; // Nếu S.cat có giá trị, gọi API lấy theo Category
-    } else if (S.tag) {
-        apiUrl = '/blogs/tag/' + S.tag;      // Nếu S.tag có giá trị, gọi API lấy theo Tag
-    }
+    // 🔥 LOGIC GỌI API LỌC TỔNG
+    let apiUrl = '/blogs/filter?';
+    if (S.keyword) apiUrl += 'keyword=' + encodeURIComponent(S.keyword) + '&';
+    if (S.cat) apiUrl += 'categoryId=' + encodeURIComponent(S.cat) + '&';
 
-    // 4. Gọi API tương ứng
     callApi(apiUrl, 'GET').done(function(res) {
-
-        // Dữ liệu lúc này đã được lọc SẠCH SẼ từ Backend
         var filteredPosts = res.result || res;
 
-        // Xử lý Sắp xếp dưới Client (Vì số lượng mảng lúc này đã rất nhỏ, sort bằng JS sẽ chớp mắt là xong)
         var parts = S.sort.split(','), f = parts[0], d = parts[1];
         filteredPosts.sort(function(a, b){
             var va = a[f] || '', vb = b[f] || '';
@@ -148,48 +183,15 @@ function renderPosts() {
         });
 
         $list.empty();
+        $cnt.html('Showing <strong>' + filteredPosts.length + '</strong> article' + (filteredPosts.length !== 1 ? 's' : ''));
 
-        // Cập nhật dòng thông báo số lượng
-        var lbl = '<strong>' + filteredPosts.length + '</strong> article' + (filteredPosts.length !== 1 ? 's' : '');
-        $cnt.html('Showing ' + lbl);
-
-        // Nếu rỗng
         if (filteredPosts.length === 0) {
-            $list.html(
-                '<div class="empty"><div class="empty-g">✦</div>' +
-                '<p style="font-size:1rem;color:var(--t2);margin-bottom:.4rem;">Không tìm thấy bài viết nào!</p>' +
-                '<p style="font-size:.875rem;">Hãy thử chọn bộ lọc khác xem sao nhé.</p></div>'
-            );
+            $list.html('<div class="empty"><div class="empty-g">✦</div><p>Không tìm thấy bài viết nào thỏa mãn bộ lọc!</p></div>');
             return;
         }
 
-        // In ra giao diện
         $.each(filteredPosts, function(_, p){
             $list.append(buildCard(p));
         });
-
     });
 }
-
-// ─────────────── 5. BẮT SỰ KIỆN NÚT CLEAR FILTER ───────────────
-$(document).on('click', '.btn-clear-filter', function() {
-    // 1. Reset toàn bộ các biến State về null
-    S.keyword = null;
-    S.cat = null;
-    S.tag = null;
-
-    // 2. Xóa param trên thanh URL của trình duyệt cho sạch sẽ
-    window.history.pushState({}, '', window.location.pathname);
-
-    // 3. Xóa nội dung trong ô input tìm kiếm (Nếu có)
-    $('#nav-search-input, #mob-search-input').val('');
-
-    // 4. Render lại toàn bộ bài viết và reset giao diện tab/sidebar (nếu có hàm)
-    if (typeof renderCatTabs === 'function') renderCatTabs();
-    if (typeof renderTags === 'function') renderTags();
-
-    // Bỏ active ở các tab danh mục bên sidebar (nếu có)
-    $('.cat-pill').removeClass('active');
-
-    renderPosts();
-});
