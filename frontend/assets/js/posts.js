@@ -1,10 +1,10 @@
 /**
- * posts.js (Phiên bản gọi API chuẩn xác với BlogResponse DTO)
+ * posts.js (Phiên bản gọi API chuẩn xác với BlogResponse DTO + Filter Banner)
  * Post list rendering: filter, sort, card builder, skeletons
  * Depends on: app.js (S, fmtDate, excerpt, initials, toast, callApi)
  */
 
-// ─────────────── 2. HÀM XÂY DỰNG GIAO DIỆN THẺ BÀI VIẾT ───────────────
+// ─────────────── 1. HÀM XÂY DỰNG GIAO DIỆN THẺ BÀI VIẾT ───────────────
 function buildCard(p) {
     // Lấy tên Category từ object lồng nhau
     var catName = p.category ? p.category.name : 'Chưa phân loại';
@@ -20,12 +20,12 @@ function buildCard(p) {
     // Lấy tên Tác giả từ object UserResponse
     var authorName = p.author ? p.author.username : 'Anonymous';
 
-    // 🔥 CẬP NHẬT 1: Xử lý Đoạn trích (Excerpt) an toàn với Editor.js JSON
+    // Xử lý Đoạn trích (Excerpt) an toàn với Editor.js JSON
     // Nếu có description thì xài, không có thì nhờ app.js bóc tách JSON ra 200 ký tự Text thường
     var plainTextContent = excerpt(p.content, 99999); // Lấy toàn bộ Text thô để đếm từ
     var postExcerpt = p.description ? p.description : excerpt(p.content, 200);
 
-    // 🔥 CẬP NHẬT 2: Tính thời gian đọc chuẩn xác (1 phút ~ 200 chữ)
+    // Tính thời gian đọc chuẩn xác (1 phút ~ 200 chữ)
     var readingTime = Math.ceil((plainTextContent.split(/\s+/).length || 1) / 200);
     if (readingTime === 0) readingTime = 1;
 
@@ -55,13 +55,12 @@ function buildCard(p) {
         '</span>' +
         '</div>'
     ).on('click', function(){
-        // 🔥 CẬP NHẬT 3: Kích hoạt chuyển trang (Routing) với URL Slug
-        // Slug này được Backend sinh tự động (VD: lap-trinh-java-123e4567...)
+        // Kích hoạt chuyển trang (Routing) với URL Slug
         window.location.href = '/post.html?id=' + p.slug;
     });
 }
 
-// ─────────────── 3. HIỆU ỨNG LOADING (SKELETON) ───────────────
+// ─────────────── 2. HIỆU ỨNG LOADING (SKELETON) ───────────────
 function skeletons(n) {
     var h = '';
     for (var i = 0; i < n; i++) {
@@ -77,6 +76,40 @@ function skeletons(n) {
     return h;
 }
 
+// ─────────────── 3. HÀM CẬP NHẬT BANNER BỘ LỌC ───────────────
+function updateFilterBanner() {
+    var $banner = $('#active-filter-banner');
+    var filterText = '';
+
+    // Kiểm tra xem người dùng đang lọc theo cái gì
+    if (S.keyword) {
+        filterText = 'Search results for: <strong>"' + S.keyword + '"</strong>';
+    } else if (S.cat) {
+        filterText = 'Filtered by <strong>Category</strong>';
+    } else if (S.tag) {
+        filterText = 'Filtered by <strong>Tag</strong>';
+    }
+
+    // Nếu có bộ lọc, hiển thị Banner màu tím nhạt
+    if (filterText) {
+        $banner.html(`
+            <div class="d-flex align-items-center justify-content-between p-3 rounded" style="background: rgba(124,111,247,0.08); border: 1px solid rgba(124,111,247,0.2);">
+                <div class="d-flex align-items-center" style="color: var(--t1); font-size: 0.95rem;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2" class="me-2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                    <span>${filterText}</span>
+                </div>
+                <button class="btn btn-sm btn-clear-filter d-flex align-items-center gap-1" style="color: var(--purple); font-weight: 500; background: none; border: none; transition: 0.2s;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    Clear & View All
+                </button>
+            </div>
+        `).slideDown(200);
+    } else {
+        // Nếu không có bộ lọc nào, giấu Banner đi
+        $banner.slideUp(200);
+    }
+}
+
 // ─────────────── 4. HÀM CHÍNH ĐỂ RENDER DANH SÁCH BÀI VIẾT ───────────────
 function renderPosts() {
     var $list = $('#post-list'), $cnt = $('#pcount');
@@ -85,21 +118,27 @@ function renderPosts() {
     $list.html(skeletons(3));
     $cnt.html('Đang tải bài viết...');
 
-    // 🔥 LOGIC CHUẨN XỊN: CHỌN ĐÚNG API ĐỂ GỌI
+    // 2. Cập nhật trạng thái hiển thị của Banner bộ lọc
+    updateFilterBanner();
+
+    // 3. LOGIC CHUẨN XỊN: CHỌN ĐÚNG API ĐỂ GỌI
     let apiUrl = '/blogs'; // Mặc định là lấy tất cả
-    if (S.cat) {
+    if (S.keyword) { // Ưu tiên gọi API tìm kiếm nếu có từ khóa
+        apiUrl = '/blogs/search?keyword=' + encodeURIComponent(S.keyword);
+    }
+    else if (S.cat) {
         apiUrl = '/blogs/category/' + S.cat; // Nếu S.cat có giá trị, gọi API lấy theo Category
     } else if (S.tag) {
         apiUrl = '/blogs/tag/' + S.tag;      // Nếu S.tag có giá trị, gọi API lấy theo Tag
     }
 
-    // 2. Gọi API tương ứng
+    // 4. Gọi API tương ứng
     callApi(apiUrl, 'GET').done(function(res) {
 
         // Dữ liệu lúc này đã được lọc SẠCH SẼ từ Backend
         var filteredPosts = res.result || res;
 
-        // 3. Xử lý Sắp xếp dưới Client (Vì số lượng mảng lúc này đã rất nhỏ, sort bằng JS sẽ chớp mắt là xong)
+        // Xử lý Sắp xếp dưới Client (Vì số lượng mảng lúc này đã rất nhỏ, sort bằng JS sẽ chớp mắt là xong)
         var parts = S.sort.split(','), f = parts[0], d = parts[1];
         filteredPosts.sort(function(a, b){
             var va = a[f] || '', vb = b[f] || '';
@@ -110,11 +149,11 @@ function renderPosts() {
 
         $list.empty();
 
-        // 4. Cập nhật dòng thông báo số lượng
+        // Cập nhật dòng thông báo số lượng
         var lbl = '<strong>' + filteredPosts.length + '</strong> article' + (filteredPosts.length !== 1 ? 's' : '');
         $cnt.html('Showing ' + lbl);
 
-        // 5. Nếu rỗng
+        // Nếu rỗng
         if (filteredPosts.length === 0) {
             $list.html(
                 '<div class="empty"><div class="empty-g">✦</div>' +
@@ -124,10 +163,33 @@ function renderPosts() {
             return;
         }
 
-        // 6. In ra giao diện
+        // In ra giao diện
         $.each(filteredPosts, function(_, p){
             $list.append(buildCard(p));
         });
 
     });
 }
+
+// ─────────────── 5. BẮT SỰ KIỆN NÚT CLEAR FILTER ───────────────
+$(document).on('click', '.btn-clear-filter', function() {
+    // 1. Reset toàn bộ các biến State về null
+    S.keyword = null;
+    S.cat = null;
+    S.tag = null;
+
+    // 2. Xóa param trên thanh URL của trình duyệt cho sạch sẽ
+    window.history.pushState({}, '', window.location.pathname);
+
+    // 3. Xóa nội dung trong ô input tìm kiếm (Nếu có)
+    $('#nav-search-input, #mob-search-input').val('');
+
+    // 4. Render lại toàn bộ bài viết và reset giao diện tab/sidebar (nếu có hàm)
+    if (typeof renderCatTabs === 'function') renderCatTabs();
+    if (typeof renderTags === 'function') renderTags();
+
+    // Bỏ active ở các tab danh mục bên sidebar (nếu có)
+    $('.cat-pill').removeClass('active');
+
+    renderPosts();
+});

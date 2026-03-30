@@ -36,6 +36,7 @@ public class SecurityConfig {
               request.requestMatchers((HttpMethod.POST),PUBLIC_ENDPOINTS).permitAll()
                       .requestMatchers("/assets/**", "/css/**", "/js/**").permitAll()
                       .requestMatchers("/categories", "/tags", "/blogs", "/blogs/**").permitAll()
+                      .requestMatchers("/blogs/search", "/blogs/search/suggestions").permitAll()
                       .requestMatchers(HttpMethod.GET,"/users").hasRole(Role.ADMIN.name())
                       .anyRequest().authenticated()
                );
@@ -74,29 +75,6 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
     }
-
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http
-//                .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/assets/**", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
-//                        .requestMatchers("/", "/login", "/register", "/forgot-password", "/error").permitAll()
-//                        .anyRequest().authenticated()
-//                )
-//                .formLogin(login -> login
-//                        .loginPage("/login")
-//                        .permitAll()
-//                )
-//                .csrf(csrf -> csrf.disable());
-//
-//        return http.build();
-//    }
-//
-//    @Bean
-//    public WebSecurityCustomizer webSecurityCustomizer() {
-//        return web -> web.ignoring()
-//                .requestMatchers("/assets/**");
-//    }
 
 
 }

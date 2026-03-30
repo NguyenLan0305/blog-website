@@ -13,9 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name="blog_views",uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id","blog_id"})}
-)
+@Table(name="blog_views")
 //mỗi khi ai đó vào đọc bài, sẽ insert 1 dòng vào đây
 public class BlogView {
 
@@ -28,8 +26,14 @@ public class BlogView {
     @org.hibernate.annotations.OnDelete(action = org.hibernate.annotations.OnDeleteAction.CASCADE)
     Blog blog;
 
-    // Có thể lưu IP hoặc User_ID để tránh tính 1 người đọc nhiều lần
+    // 🔥 THÊM CỘT USER: Để trống (nullable = true) vì cho phép Khách (Guest) không có tài khoản vẫn tăng View được
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    User user;
+
+    // Vẫn giữ IP để dự phòng cho Guest
     String ipAddress;
+
     LocalDateTime viewedAt;
 
     @PrePersist

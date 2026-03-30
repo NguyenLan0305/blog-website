@@ -8,6 +8,7 @@ var S = {
     page:   'home',
     cat:    null,
     tag:    null,
+    keyword: null, //  BIẾN NÀY ĐỂ LƯU TỪ KHÓA TÌM KIẾM
     sort:   'createdAt,desc',
 
     get isAuth() { return localStorage.getItem('token') !== null; },
