@@ -1,15 +1,13 @@
 /**
- * posts.js (Phiên bản gọi API chuẩn xác với BlogResponse DTO)
+ * posts.js (Phiên bản gọi API chuẩn xác với BlogResponse DTO + Filter Banner)
  * Post list rendering: filter, sort, card builder, skeletons
  * Depends on: app.js (S, fmtDate, excerpt, initials, toast, callApi)
  */
 
-// ─────────────── 2. HÀM XÂY DỰNG GIAO DIỆN THẺ BÀI VIẾT ───────────────
+// ─────────────── 1. HÀM XÂY DỰNG GIAO DIỆN THẺ BÀI VIẾT ───────────────
 function buildCard(p) {
-    // Lấy tên Category từ object lồng nhau
     var catName = p.category ? p.category.name : 'Chưa phân loại';
 
-    // Xây dựng danh sách Tags
     var tagsHtml = '';
     if (p.tags && p.tags.length > 0) {
         $.each(p.tags, function(_, t){
@@ -17,15 +15,11 @@ function buildCard(p) {
         });
     }
 
-    // Lấy tên Tác giả từ object UserResponse
     var authorName = p.author ? p.author.username : 'Anonymous';
 
-    // 🔥 CẬP NHẬT 1: Xử lý Đoạn trích (Excerpt) an toàn với Editor.js JSON
-    // Nếu có description thì xài, không có thì nhờ app.js bóc tách JSON ra 200 ký tự Text thường
-    var plainTextContent = excerpt(p.content, 99999); // Lấy toàn bộ Text thô để đếm từ
+    var plainTextContent = excerpt(p.content, 99999);
     var postExcerpt = p.description ? p.description : excerpt(p.content, 200);
 
-    // 🔥 CẬP NHẬT 2: Tính thời gian đọc chuẩn xác (1 phút ~ 200 chữ)
     var readingTime = Math.ceil((plainTextContent.split(/\s+/).length || 1) / 200);
     if (readingTime === 0) readingTime = 1;
 
@@ -45,7 +39,6 @@ function buildCard(p) {
         '<div class="pc-title">' + p.title + '</div>' +
         '<div class="pc-author"><span class="ac">' + initials(authorName) + '</span>' + authorName + '</div>' +
 
-        // Đoạn trích (Mô tả)
         '<p class="pc-exc">' + postExcerpt + '</p>' +
 
         '<div class="pc-foot">' +
@@ -55,13 +48,11 @@ function buildCard(p) {
         '</span>' +
         '</div>'
     ).on('click', function(){
-        // 🔥 CẬP NHẬT 3: Kích hoạt chuyển trang (Routing) với URL Slug
-        // Slug này được Backend sinh tự động (VD: lap-trinh-java-123e4567...)
         window.location.href = '/post.html?id=' + p.slug;
     });
 }
 
-// ─────────────── 3. HIỆU ỨNG LOADING (SKELETON) ───────────────
+// ─────────────── 2. HIỆU ỨNG LOADING (SKELETON) ───────────────
 function skeletons(n) {
     var h = '';
     for (var i = 0; i < n; i++) {
@@ -77,29 +68,112 @@ function skeletons(n) {
     return h;
 }
 
-// ─────────────── 4. HÀM CHÍNH ĐỂ RENDER DANH SÁCH BÀI VIẾT ───────────────
+// ─────────────── HÀM CẬP NHẬT BANNER BỘ LỌC (NÂNG CẤP) ───────────────
+function updateFilterBanner() {
+    var $banner = $('#active-filter-banner');
+    var activeFiltersHtml = '';
+
+    if (S.keyword) {
+        activeFiltersHtml += `
+            <span class="badge bg-light text-dark border p-2 me-2 d-inline-flex align-items-center gap-2" style="font-size: 0.85rem;">
+                <span class="text-muted">Search:</span> <strong>${S.keyword}</strong>
+                <span class="btn-remove-filter" data-type="keyword" style="cursor:pointer; color: var(--red);">✖</span>
+            </span>`;
+    }
+
+    if (S.cat) {
+        // 🔥 Lấy tên Category đang active từ biến toàn cục CATEGORIES (nếu có)
+        var activeCatName = 'Active';
+        if (typeof CATEGORIES !== 'undefined') {
+            var foundCat = CATEGORIES.find(c => c.id === S.cat);
+            if (foundCat) activeCatName = foundCat.name;
+        }
+
+        activeFiltersHtml += `
+            <span class="badge bg-light text-dark border p-2 me-2 d-inline-flex align-items-center gap-2" style="font-size: 0.85rem;">
+                <span class="text-muted">Category:</span> <strong>${activeCatName}</strong>
+                <span class="btn-remove-filter" data-type="cat" style="cursor:pointer; color: var(--red);">✖</span>
+            </span>`;
+    }
+
+    if (activeFiltersHtml !== '') {
+        $banner.html(`
+            <div class="d-flex align-items-center justify-content-between p-3 rounded mb-3" style="background: rgba(124,111,247,0.05); border: 1px dashed rgba(124,111,247,0.3);">
+                <div class="d-flex align-items-center flex-wrap">
+                    <span class="me-3" style="color: var(--t2); font-size: 0.9rem;">Active filters:</span>
+                    ${activeFiltersHtml}
+                </div>
+                <button class="btn btn-sm btn-clear-filter text-muted" style="background: none; border: none; font-size: 0.85rem; text-decoration: underline;">
+                    Clear All
+                </button>
+            </div>
+        `).slideDown(200);
+    } else {
+        $banner.slideUp(200);
+    }
+}
+
+// Bắt sự kiện XÓA TỪNG BỘ LỌC
+$(document).on('click', '.btn-remove-filter', function() {
+    var type = $(this).data('type');
+
+    if (type === 'keyword') {
+        S.keyword = null;
+        $('#nav-search-input, #mob-search-input').val('');
+    } else if (type === 'cat') {
+        S.cat = null;
+    }
+
+    // Cập nhật lại URL bằng hàm ở filters.js (nếu có)
+    if (typeof updateUrlWithFilters === 'function') {
+        updateUrlWithFilters();
+    } else {
+        window.history.pushState({}, '', window.location.pathname);
+    }
+
+    // Cập nhật lại giao diện các nút
+    if (typeof renderCatTabs === 'function') renderCatTabs();
+    if (typeof renderSbCategories === 'function') renderSbCategories();
+
+    renderPosts();
+});
+
+// Bắt sự kiện XÓA TẤT CẢ (Clear All)
+$(document).on('click', '.btn-clear-filter', function() {
+    S.keyword = null; S.cat = null; S.tag = null;
+
+    $('#nav-search-input, #mob-search-input').val('');
+
+    if (typeof updateUrlWithFilters === 'function') {
+        updateUrlWithFilters();
+    } else {
+        window.history.pushState({}, '', window.location.pathname);
+    }
+
+    // Cập nhật lại giao diện các nút
+    if (typeof renderCatTabs === 'function') renderCatTabs();
+    if (typeof renderSbCategories === 'function') renderSbCategories();
+    if (typeof renderTags === 'function') renderTags();
+
+    renderPosts();
+});
+
+// ─────────────── HÀM CHÍNH ĐỂ RENDER DANH SÁCH BÀI VIẾT ───────────────
 function renderPosts() {
     var $list = $('#post-list'), $cnt = $('#pcount');
-
-    // 1. Hiện Skeleton Loading ngay lập tức
     $list.html(skeletons(3));
     $cnt.html('Đang tải bài viết...');
 
-    // 🔥 LOGIC CHUẨN XỊN: CHỌN ĐÚNG API ĐỂ GỌI
-    let apiUrl = '/blogs'; // Mặc định là lấy tất cả
-    if (S.cat) {
-        apiUrl = '/blogs/category/' + S.cat; // Nếu S.cat có giá trị, gọi API lấy theo Category
-    } else if (S.tag) {
-        apiUrl = '/blogs/tag/' + S.tag;      // Nếu S.tag có giá trị, gọi API lấy theo Tag
-    }
+    updateFilterBanner();
 
-    // 2. Gọi API tương ứng
+    // 🔥 LOGIC GỌI API LỌC TỔNG
+    let apiUrl = '/blogs/filter?';
+    if (S.keyword) apiUrl += 'keyword=' + encodeURIComponent(S.keyword) + '&';
+    if (S.cat) apiUrl += 'categoryId=' + encodeURIComponent(S.cat) + '&';
+
     callApi(apiUrl, 'GET').done(function(res) {
-
-        // Dữ liệu lúc này đã được lọc SẠCH SẼ từ Backend
         var filteredPosts = res.result || res;
 
-        // 3. Xử lý Sắp xếp dưới Client (Vì số lượng mảng lúc này đã rất nhỏ, sort bằng JS sẽ chớp mắt là xong)
         var parts = S.sort.split(','), f = parts[0], d = parts[1];
         filteredPosts.sort(function(a, b){
             var va = a[f] || '', vb = b[f] || '';
@@ -109,25 +183,15 @@ function renderPosts() {
         });
 
         $list.empty();
+        $cnt.html('Showing <strong>' + filteredPosts.length + '</strong> article' + (filteredPosts.length !== 1 ? 's' : ''));
 
-        // 4. Cập nhật dòng thông báo số lượng
-        var lbl = '<strong>' + filteredPosts.length + '</strong> article' + (filteredPosts.length !== 1 ? 's' : '');
-        $cnt.html('Showing ' + lbl);
-
-        // 5. Nếu rỗng
         if (filteredPosts.length === 0) {
-            $list.html(
-                '<div class="empty"><div class="empty-g">✦</div>' +
-                '<p style="font-size:1rem;color:var(--t2);margin-bottom:.4rem;">Không tìm thấy bài viết nào!</p>' +
-                '<p style="font-size:.875rem;">Hãy thử chọn bộ lọc khác xem sao nhé.</p></div>'
-            );
+            $list.html('<div class="empty"><div class="empty-g">✦</div><p>Không tìm thấy bài viết nào thỏa mãn bộ lọc!</p></div>');
             return;
         }
 
-        // 6. In ra giao diện
         $.each(filteredPosts, function(_, p){
             $list.append(buildCard(p));
         });
-
     });
 }

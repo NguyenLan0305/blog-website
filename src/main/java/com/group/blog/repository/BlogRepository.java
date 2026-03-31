@@ -40,4 +40,24 @@ public interface BlogRepository extends JpaRepository<Blog, UUID> {
             "(SELECT COUNT(c) FROM Comment c WHERE c.blog = b) " +
             "FROM Blog b JOIN b.tags t WHERE t.id = :tagId")
     List<Object[]> findBlogsByTagIdWithCounts(@Param("tagId") UUID tagId);
+
+    // Tìm kiếm bài viết theo tiêu đề
+    @Query("SELECT b, " +
+            "(SELECT COUNT(v) FROM BlogView v WHERE v.blog = b), " +
+            "(SELECT COUNT(l) FROM BlogLike l WHERE l.blog = b), " +
+            "(SELECT COUNT(c) FROM Comment c WHERE c.blog = b) " +
+            "FROM Blog b WHERE LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List<Object[]> searchBlogsByKeywordWithCounts(@Param("keyword") String keyword);
+
+    // Chỉ lấy 5 bài viết khớp tiêu đề, không cần JOIN đếm view cho nhẹ
+    List<Blog> findTop5ByTitleContainingIgnoreCase(String title);
+
+    // Tìm kiếm KẾT HỢP cả Từ khóa VÀ Danh mục
+    @Query("SELECT b, " +
+            "(SELECT COUNT(v) FROM BlogView v WHERE v.blog = b), " +
+            "(SELECT COUNT(l) FROM BlogLike l WHERE l.blog = b), " +
+            "(SELECT COUNT(c) FROM Comment c WHERE c.blog = b) " +
+            "FROM Blog b WHERE LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "AND b.category.id = :categoryId")
+    List<Object[]> findByKeywordAndCategoryIdWithCounts(@Param("keyword") String keyword, @Param("categoryId") UUID categoryId);
 }

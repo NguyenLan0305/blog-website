@@ -3,6 +3,7 @@ package com.group.blog.service;
 import com.group.blog.dto.request.BlogCreationRequest;
 import com.group.blog.dto.request.BlogUpdateRequest;
 import com.group.blog.dto.response.BlogResponse;
+import com.group.blog.dto.response.BlogSuggestionResponse;
 import com.group.blog.entity.*;
 import com.group.blog.exception.AppException;
 import com.group.blog.exception.ErrorCode;
@@ -155,6 +156,49 @@ public class BlogService {
     // Trả về list Blog khi biết Tag ID
     public List<BlogResponse> getBlogsByTag(UUID tagId) {
         List<Object[]> results = blogRepository.findBlogsByTagIdWithCounts(tagId);
+        return results.stream().map(this::mapRowToBlogResponse).toList();
+    }
+
+    public List<BlogResponse> searchBlogs(String keyword) {
+        List<Object[]> results = blogRepository.searchBlogsByKeywordWithCounts(keyword);
+        // mapRowToBlogResponse chính là cái hàm Helper bạn đã tạo ở bài trước
+        return results.stream().map(this::mapRowToBlogResponse).toList();
+    }
+
+
+    public List<BlogSuggestionResponse> getSearchSuggestions(String keyword) {
+        return blogRepository.findTop5ByTitleContainingIgnoreCase(keyword)
+                .stream().map(blog -> BlogSuggestionResponse.builder()
+                        .id(blog.getId())
+                        .title(blog.getTitle())
+                        // Vẫn giữ logic Slug ghép UUID chuẩn 3NF
+                        .slug(SlugUtils.generateSlug(blog.getTitle()) + "-" + blog.getId())
+
+                        // 🔥 THÊM LOGIC LẤY TÊN TÁC GIẢ VÀ DANH MỤC Ở ĐÂY
+                        .authorName(blog.getAuthor() != null ? blog.getAuthor().getUsername() : "Anonymous")
+                        .categoryName(blog.getCategory() != null ? blog.getCategory().getName() : "Khác")
+
+                        .build())
+                .toList();
+    }
+
+    // Hàm xử lý lọc đa luồng
+    public List<BlogResponse> filterBlogs(String keyword, UUID categoryId) {
+        List<Object[]> results;
+
+        boolean hasKeyword = (keyword != null && !keyword.trim().isEmpty());
+        boolean hasCategory = (categoryId != null);
+
+        if (hasKeyword && hasCategory) {
+            results = blogRepository.findByKeywordAndCategoryIdWithCounts(keyword, categoryId);
+        } else if (hasKeyword) {
+            results = blogRepository.searchBlogsByKeywordWithCounts(keyword);
+        } else if (hasCategory) {
+            results = blogRepository.findBlogsByCategoryIdWithCounts(categoryId);
+        } else {
+            results = blogRepository.findAllBlogsWithCounts();
+        }
+
         return results.stream().map(this::mapRowToBlogResponse).toList();
     }
 

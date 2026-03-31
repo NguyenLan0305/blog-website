@@ -4,6 +4,7 @@ import com.group.blog.dto.request.ApiResponse;
 import com.group.blog.dto.request.BlogCreationRequest;
 import com.group.blog.dto.request.BlogUpdateRequest;
 import com.group.blog.dto.response.BlogResponse;
+import com.group.blog.dto.response.BlogSuggestionResponse;
 import com.group.blog.service.BlogService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -76,6 +77,30 @@ public class BlogController {
     public ApiResponse<List<BlogResponse>> getBlogsByTag(@PathVariable UUID tagId) {
         return ApiResponse.<List<BlogResponse>>builder()
                 .result(blogService.getBlogsByTag(tagId))
+                .build();
+    }
+
+    @GetMapping("/search")
+    public ApiResponse<List<BlogResponse>> searchBlogs(@RequestParam("keyword") String keyword) {
+        return ApiResponse.<List<BlogResponse>>builder()
+                .result(blogService.searchBlogs(keyword))
+                .build();
+    }
+
+    @GetMapping("/search/suggestions")
+    public ApiResponse<List<BlogSuggestionResponse>> getSuggestions(@RequestParam("keyword") String keyword) {
+        return ApiResponse.<List<BlogSuggestionResponse>>builder()
+                .result(blogService.getSearchSuggestions(keyword))
+                .build();
+    }
+
+
+    @GetMapping("/filter")
+    public ApiResponse<List<BlogResponse>> filterBlogs(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) UUID categoryId) {
+        return ApiResponse.<List<BlogResponse>>builder()
+                .result(blogService.filterBlogs(keyword, categoryId))
                 .build();
     }
 }
