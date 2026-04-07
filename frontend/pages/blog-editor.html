@@ -1,10 +1,924 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="dark" lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Nocturnal Bleb | Editor</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 
+    <!-- Tailwind config -->
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "outline-variant": "#2D333B",
+                        "on-surface": "#E6EDF3",
+                        "surface-container": "#1C2128",
+                        "surface-container-low": "#1C2128",
+                        "surface-container-high": "#2D333B",
+                        "surface-container-highest": "#30363D",
+                        "primary": "#FFFFFF",
+                        "background": "#0D1117",
+                        "on-surface-variant": "#8B949E",
+                        "pv-surface-dim": "#0b0e14",
+                        "pv-primary": "#ac8aff",
+                        "pv-primary-container": "#8f60fa",
+                        "pv-on-primary": "#280067",
+                        "pv-on-surface": "#e0e5f5",
+                        "pv-on-surface-variant": "#a5abba",
+                        "pv-outline-variant": "#424855",
+                        "pv-surface-container": "#151a22",
+                        "pv-surface-container-low": "#10131b",
+                        "pv-surface-container-high": "#1b202a",
+                    },
+                },
+            },
+        }
+    </script>
+
+    <style>
+        /* === Khi dùng thực tế, bỏ khối <style> này và dùng: ===
+           <link rel="stylesheet" href="main.css">
+           ======================================================= */
+
+        body { background-color: #0D1117; color: #E6EDF3; font-family: 'Inter', sans-serif; }
+        [contenteditable]:focus { outline: none; }
+
+        /* ── View switching ── */
+        #view-editor  { display: flex; }
+        #view-preview { display: none; }
+        body.show-preview #view-editor  { display: none; }
+        body.show-preview #view-preview { display: block; }
+        body.show-preview { background-color: #0b0e14; }
+
+        /* ── Block system ── */
+        .block-row { position:relative; display:flex; align-items:flex-start; gap:0; min-height:2rem; padding:2px 0; }
+        .block-row.drag-over { border-top: 2px solid #FFFFFF44; }
+        .block-row.dragging  { opacity: 0.35; }
+
+        .block-gutter { position:absolute; left:-56px; top:2px; display:flex; align-items:center; gap:1px; opacity:0; transition:opacity 0.15s; user-select:none; }
+        .block-row:hover .block-gutter { opacity: 1; }
+
+        .gutter-btn { width:22px; height:22px; display:flex; align-items:center; justify-content:center; border-radius:4px; color:#8B949E; background:transparent; border:none; cursor:pointer; transition:background 0.15s,color 0.15s; flex-shrink:0; }
+        .gutter-btn:hover { background:#2D333B; color:#E6EDF3; }
+        .gutter-btn.drag-handle { cursor:grab; }
+        .gutter-btn.drag-handle:active { cursor:grabbing; }
+        .gutter-btn .material-symbols-outlined { font-size:17px; }
+
+        .block-content { flex:1; min-width:0; outline:none; caret-color:#E6EDF3; word-break:break-word; line-height:1.7; font-size:1.125rem; color:#E6EDF3CC; font-family:'Inter',sans-serif; }
+        .block-content:empty::before { content:attr(data-placeholder); color:#484F58; pointer-events:none; }
+
+        .block-content[data-type="h1"] { font-size:2rem; font-weight:700; font-family:'Newsreader',serif; color:#E6EDF3; }
+        .block-content[data-type="h2"] { font-size:1.5rem; font-weight:600; font-family:'Newsreader',serif; color:#E6EDF3; }
+        .block-content[data-type="h3"] { font-size:1.2rem; font-weight:600; color:#E6EDF3; }
+        .block-content[data-type="quote"] { border-left:3px solid #FFFFFF55; padding-left:1rem; font-style:italic; color:#8B949E; }
+        .block-content[data-type="code"] { font-family:'JetBrains Mono',monospace; background:#161b22; border:1px solid #2D333B; border-radius:6px; padding:0.75rem 1rem; font-size:0.9rem; color:#E6EDF3; white-space:pre-wrap; }
+        .block-content[data-type="bullet"] { padding-left:1.75rem; color:#E6EDF3CC; position:relative; }
+        .block-content[data-type="bullet"]::before { content:'•'; position:absolute; left:0.5rem; color:#E6EDF3CC; }
+        .block-content[data-type="numbered"] { padding-left:1.75rem; color:#E6EDF3CC; position:relative; }
+        .block-content[data-type="numbered"]::before { content:attr(data-num) '.'; position:absolute; left:0; color:#E6EDF3CC; min-width:1.5rem; }
+
+        .block-todo { display:flex; align-items:flex-start; gap:0.5rem; flex:1; }
+        .block-todo input[type="checkbox"] { margin-top:4px; flex-shrink:0; accent-color:#FFFFFF; width:15px; height:15px; cursor:pointer; }
+        .block-todo .todo-text { flex:1; outline:none; font-size:1.125rem; line-height:1.7; color:#E6EDF3CC; caret-color:#E6EDF3; word-break:break-word; }
+        .block-todo .todo-text:empty::before { content:'To-do…'; color:#484F58; pointer-events:none; }
+
+        .block-image-wrap { flex:1; border-radius:8px; overflow:hidden; background:#1C2128; border:1px dashed #2D333B; display:flex; align-items:center; justify-content:center; min-height:120px; cursor:pointer; transition:border-color 0.2s; position:relative; }
+        .block-image-wrap:hover { border-color:#8B949E; }
+        .block-image-wrap img { width:100%; display:block; border-radius:8px; }
+        .block-image-wrap .img-placeholder { display:flex; flex-direction:column; align-items:center; gap:0.5rem; color:#484F58; pointer-events:none; padding:2rem; }
+        .block-image-wrap .img-placeholder .material-symbols-outlined { font-size:2rem; }
+        .block-image-wrap .img-placeholder span:last-child { font-size:0.8rem; }
+        .block-image-wrap .img-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.2s; }
+        .block-image-wrap:hover .img-overlay { opacity:1; }
+        .block-image-wrap .img-overlay span { color:#fff; font-size:0.8rem; }
+        .block-image-outer { flex:1; display:flex; flex-direction:column; gap:0; }
+        .img-caption { width:100%; text-align:center; font-size:0.82rem; color:#8B949E; font-style:italic; padding:0.45rem 0.5rem 0.2rem; outline:none; caret-color:#E6EDF3; background:transparent; border:none; min-height:1.6rem; line-height:1.5; }
+        .img-caption:empty::before { content:'Add a caption…'; color:#484F5844; pointer-events:none; }
+
+        /* ── Slash menu ── */
+        #slash-menu { position:fixed; width:280px; background:#1C2128; border:1px solid #2D333B; border-radius:12px; box-shadow:0 16px 48px rgba(0,0,0,0.6); padding:4px; z-index:9999; display:none; }
+        #slash-menu .menu-section { padding:6px 10px 3px; font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#8B949E; }
+        #slash-menu .menu-item { display:flex; align-items:center; gap:10px; padding:6px 8px; border-radius:8px; cursor:pointer; transition:background 0.1s; }
+        #slash-menu .menu-item:hover, #slash-menu .menu-item.active { background:#2D333B; }
+        .menu-icon { width:30px; height:30px; border-radius:6px; border:1px solid #2D333B; background:#0D1117; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .menu-icon .material-symbols-outlined { font-size:14px; color:#E6EDF3; }
+        .menu-item-text { display:flex; flex-direction:column; }
+        .menu-item-text strong { font-size:13px; font-weight:500; color:#E6EDF3; }
+        .menu-item-text span  { font-size:10px; color:#8B949E; }
+
+        .no-scrollbar::-webkit-scrollbar { display:none; }
+        #title-input { field-sizing:content; }
+
+        /* ── Mobile: floating block toolbar ── */
+        #mob-block-toolbar {
+            display: none;
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            z-index: 8888;
+            background: #1C2128;
+            border-top: 1px solid #2D333B;
+            padding: 8px 16px 20px;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-around;
+            gap: 4px;
+        }
+        #mob-block-toolbar.visible { display: flex; }
+        .mob-tb-btn {
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+            background: transparent; border: none; cursor: pointer;
+            color: #8B949E; padding: 6px 10px; border-radius: 8px;
+            transition: background 0.15s, color 0.15s; flex: 1; min-width: 0;
+        }
+        .mob-tb-btn:active { background: #2D333B; color: #E6EDF3; }
+        .mob-tb-btn .material-symbols-outlined { font-size: 20px; }
+        .mob-tb-btn span:last-child { font-size: 9px; color: #525870; }
+        .mob-tb-sep { width: 1px; height: 32px; background: #2D333B; flex-shrink: 0; }
+
+        @media (hover: none) and (pointer: coarse) {
+            .block-gutter { opacity: 1 !important; left: -48px; }
+            .gutter-btn { width: 26px; height: 26px; }
+            #editor-area { padding-left: 3.5rem !important; }
+            #banner-filled .absolute { opacity: 1 !important; }
+            #title-input { font-size: 2rem !important; }
+            .gutter-btn.drag-handle { display: none; }
+        }
+
+        /* ── FIX MOBILE: header nút không bị mất ── */
+        @media (max-width: 640px) {
+            /* editor left padding for gutter */
+            #editor-area { padding-left: 3rem !important; }
+            .block-gutter { left: -44px; }
+
+            /* Header: thu gọn padding, cho nút đủ chỗ */
+            #view-editor header { padding: 0.55rem 0.75rem; }
+
+            /* CHỈ ẩn header-title (tên bài), KHÔNG ẩn nút Save Draft / Publish */
+            #view-editor header #header-title { display: none; }
+
+            /* Thu nhỏ nút cho vừa màn hình */
+            #view-editor header .flex.items-center.gap-3 { gap: 0.4rem; }
+            #view-editor header button {
+                padding: 0.35rem 0.85rem !important;
+                font-size: 0.78rem !important;
+            }
+
+            /* main content padding */
+            #view-editor .max-w-3xl { padding-left: 1rem; padding-right: 1rem; }
+
+            /* banner height compact */
+            #banner-filled { height: 200px !important; }
+        }
+
+        /* ── Preview responsive ── */
+        .pv-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: start;
+        }
+        @media (max-width: 900px) {
+            .pv-grid { grid-template-columns: 1fr; gap: 2rem; }
+            .pv-sticky { position: static !important; }
+            #view-preview main { padding: 0.5rem 1rem 6rem !important; }
+            #view-preview nav { padding: 1rem 1.25rem !important; }
+        }
+        @media (max-width: 640px) {
+            .pv-grid { gap: 1.5rem; }
+            #view-preview main { padding: 0.5rem 0.75rem 6rem !important; }
+            #view-preview section.pv-editorial-shadow { padding: 1.5rem !important; }
+            #pv-banner-wrap { aspect-ratio: 16/9 !important; }
+        }
+
+        /* ── Preview styles ── */
+        #view-preview { min-height:100vh; background:#0b0e14; color:#e0e5f5; font-family:'Inter',sans-serif; }
+        .pv-editorial-shadow { box-shadow:0 40px 100px -20px rgba(172,138,255,0.06); }
+        .pv-tag-chip { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:9999px; background:rgba(172,138,255,0.12); border:1px solid rgba(172,138,255,0.2); color:#ac8aff; font-size:0.75rem; font-weight:500; }
+        .pv-tag-chip button { display:flex; align-items:center; background:none; border:none; cursor:pointer; padding:0; color:#ac8aff; opacity:0.6; transition:opacity 0.15s; }
+        .pv-tag-chip button:hover { opacity:1; }
+        .pv-tag-chip button .material-symbols-outlined { font-size:13px; }
+        #pv-tag-input-wrap { display:flex; flex-wrap:wrap; gap:6px; align-items:center; width:100%; background:#151a22; border:1px solid rgba(66,72,85,0.15); border-radius:0.5rem; padding:8px 12px; min-height:48px; cursor:text; transition:border-color 0.2s; }
+        #pv-tag-input-wrap:focus-within { border-color:rgba(172,138,255,0.3); box-shadow:0 0 0 2px rgba(172,138,255,0.08); }
+        #pv-tag-input-field { background:transparent; border:none; outline:none; color:#e0e5f5; font-size:0.9rem; font-family:'Inter',sans-serif; flex:1; min-width:120px; caret-color:#ac8aff; }
+        #pv-tag-input-field::placeholder { color:#707583; }
+        .pv-suggestion-btn { padding:5px 14px; border-radius:9999px; border:1px solid rgba(66,72,85,0.4); background:transparent; color:#a5abba; font-size:0.78rem; font-family:'Inter',sans-serif; cursor:pointer; transition:all 0.15s; }
+        .pv-suggestion-btn:hover { border-color:rgba(172,138,255,0.4); color:#ac8aff; background:rgba(172,138,255,0.06); }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+<!-- ═══════════════════════════════════════════════════════
+     VIEW 1: EDITOR
+═══════════════════════════════════════════════════════ -->
+<div id="view-editor" class="flex-col min-h-screen w-full">
+
+    <header class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-4 bg-[#0D1117]/80 backdrop-blur-md border-b border-[#2D333B]/40">
+        <div class="flex items-center gap-4 min-w-0">
+            <span class="material-symbols-outlined text-2xl text-white flex-shrink-0">eco</span>
+            <!-- FIX: id="header-title" để CSS mobile target đúng, không ẩn nút -->
+            <span class="text-sm font-medium text-[#8B949E] truncate" id="header-title">test blog 1</span>
+        </div>
+        <div class="flex items-center gap-3 flex-shrink-0">
+            <button class="bg-[#2D333B] text-[#E6EDF3] px-5 py-2 rounded-full text-sm font-medium hover:bg-[#30363D] transition-all whitespace-nowrap">Save Draft</button>
+            <button id="btn-publish" class="bg-white text-[#0D1117] px-6 py-2 rounded-full text-sm font-bold hover:opacity-90 transition-all whitespace-nowrap" onclick="showPreview()">Publish</button>
+        </div>
+    </header>
+
+    <div class="flex flex-1 pt-24 pb-32">
+        <main class="flex-1 overflow-y-auto no-scrollbar">
+            <div class="max-w-3xl mx-auto px-6 space-y-10">
+
+                <!-- Banner -->
+                <section class="relative group" id="banner-section">
+                    <input type="file" id="banner-input" class="hidden" accept="image/*"/>
+                    <div id="banner-empty"
+                         class="w-full h-[180px] bg-[#1C2128] rounded-xl border border-dashed border-[#2D333B] flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-[#484F58] transition-colors"
+                         onclick="document.getElementById('banner-input').click()">
+                        <span class="material-symbols-outlined text-3xl text-[#484F58]">add_photo_alternate</span>
+                        <span class="text-sm text-[#484F58] italic">Add a blog banner…</span>
+                    </div>
+                    <div id="banner-filled" class="hidden w-full h-[360px] rounded-xl overflow-hidden border border-[#2D333B]/60 relative">
+                        <img id="banner-img" alt="Blog Banner" class="w-full h-full object-cover"/>
+                        <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="document.getElementById('banner-input').click()"
+                                    class="bg-white/10 backdrop-blur-xl border border-white/20 px-6 py-3 rounded-full flex items-center gap-2 text-white hover:bg-white/20">
+                                <span class="material-symbols-outlined">image</span>
+                                <span class="text-sm font-medium">Change Banner</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Title -->
+                <section class="space-y-3">
+          <textarea id="title-input" rows="1"
+                    class="w-full bg-transparent border-none focus:ring-0 text-5xl md:text-6xl font-['Newsreader'] font-bold text-[#E6EDF3] placeholder:text-[#484F58] resize-none px-0 leading-tight"
+                    placeholder="Enter Title...">test blog 1</textarea>
+                    <div class="h-px bg-[#2D333B]/60 w-full"></div>
+                </section>
+
+                <!-- Editor blocks -->
+                <article class="relative pl-14" id="editor-area"></article>
+
+            </div>
+        </main>
+    </div>
+
+</div><!-- end #view-editor -->
+
+
+<!-- ═══════════════════════════════════════════════════════
+     VIEW 2: PREVIEW / PUBLISH
+═══════════════════════════════════════════════════════ -->
+<div id="view-preview">
+
+    <header class="w-full sticky top-0 z-50" style="background:#0b0e14;">
+        <nav class="flex justify-between items-center px-8 py-6 w-full max-w-screen-2xl mx-auto">
+            <div style="font-family:'Newsreader',serif; font-weight:700; color:#e0e5f5; font-size:1.5rem; letter-spacing:-0.02em;">
+                Nocturnal Bleb
+            </div>
+            <button onclick="hidePreview()" title="Back to editor"
+                    style="padding:8px; border-radius:9999px; background:transparent; border:none; cursor:pointer; color:#a5abba; transition:all 0.2s;"
+                    onmouseover="this.style.background='#10131b'; this.style.color='#e0e5f5';"
+                    onmouseout="this.style.background='transparent'; this.style.color='#a5abba';">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </nav>
+    </header>
+
+    <main style="max-width:1280px; margin:0 auto; padding:1rem 2rem 5rem; box-sizing:border-box;">
+        <div class="pv-grid">
+
+            <!-- Left: story card preview -->
+            <section class="pv-sticky" style="position:sticky; top:7rem;">
+                <div style="font-size:0.6875rem; text-transform:uppercase; letter-spacing:0.05rem; color:#ac8aff; margin-bottom:1.5rem;">
+                    Story Preview
+                </div>
+                <div class="pv-editorial-shadow" style="border-radius:0.75rem; background:#10131b; overflow:hidden; transition:transform 0.4s;"
+                     onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='none'">
+
+                    <div id="pv-banner-wrap" style="aspect-ratio:4/3; width:100%; position:relative; overflow:hidden; background:#1C2128;">
+                        <img id="pv-banner-img" style="width:100%; height:100%; object-fit:cover; display:none; transition:transform 0.6s;"
+                             onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='none'" alt="Banner"/>
+                        <div id="pv-banner-empty" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#484F58; flex-direction:column; gap:0.5rem;">
+                            <span class="material-symbols-outlined" style="font-size:2.5rem;">image</span>
+                            <span style="font-size:0.8rem; font-style:italic;">No banner added</span>
+                        </div>
+                        <div style="position:absolute; inset:0; background:linear-gradient(to top, #0b0e14 0%, transparent 60%); opacity:0.6;"></div>
+                    </div>
+
+                    <div style="padding:2rem; display:flex; flex-direction:column; gap:1rem;">
+                        <h3 id="pv-title" style="font-family:'Newsreader',serif; font-size:1.875rem; color:#e0e5f5; line-height:1.25;">test blog 1</h3>
+                        <p id="pv-desc" style="color:#a5abba; font-size:0.875rem; line-height:1.6; max-width:28rem;">
+                            Your content is looking great. Review the details on the right to finalize your publication settings.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right: finalize form -->
+            <section class="pv-editorial-shadow" style="background:#10131b; border-radius:0.75rem; padding:2.5rem;">
+                <div style="margin-bottom:2.5rem;">
+                    <h3 style="font-family:'Newsreader',serif; font-size:1.5rem; color:#e0e5f5; margin-bottom:0.5rem;">Finalize Details</h3>
+                    <p style="color:#a5abba; font-size:0.875rem;">Fine-tune how your story appears in the feed.</p>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:2rem;">
+
+                    <div>
+                        <label style="display:block; font-size:0.6875rem; text-transform:uppercase; letter-spacing:0.05rem; color:#a5abba; margin-bottom:0.5rem; padding:0 4px;">Blog Title</label>
+                        <input id="pv-form-title" type="text" value="test blog 1"
+                               style="width:100%; background:#151a22; border:1px solid rgba(66,72,85,0.15); border-radius:0.5rem; padding:0.75rem 1rem; color:#e0e5f5; font-family:'Inter',sans-serif; font-size:0.9rem; outline:none; transition:all 0.2s; box-sizing:border-box;"
+                               onfocus="this.style.borderColor='rgba(172,138,255,0.3)'; this.style.boxShadow='0 0 0 2px rgba(172,138,255,0.08)';"
+                               onblur="this.style.borderColor='rgba(66,72,85,0.15)'; this.style.boxShadow='none';"
+                               oninput="document.getElementById('pv-title').textContent = this.value || 'Untitled'"/>
+                    </div>
+
+                    <div>
+                        <label style="display:block; font-size:0.6875rem; text-transform:uppercase; letter-spacing:0.05rem; color:#a5abba; margin-bottom:0.5rem; padding:0 4px;">Short Description</label>
+                        <textarea id="pv-form-desc" rows="4" maxlength="200"
+                                  placeholder="A brief hook that captures the essence of your story…"
+                                  style="width:100%; background:#151a22; border:1px solid rgba(66,72,85,0.15); border-radius:0.5rem; padding:0.75rem 1rem; color:#e0e5f5; font-family:'Inter',sans-serif; font-size:0.9rem; outline:none; resize:none; transition:all 0.2s; box-sizing:border-box;"
+                                  onfocus="this.style.borderColor='rgba(172,138,255,0.3)'; this.style.boxShadow='0 0 0 2px rgba(172,138,255,0.08)';"
+                                  onblur="this.style.borderColor='rgba(66,72,85,0.15)'; this.style.boxShadow='none';"
+                                  oninput="pvUpdateDesc(this)"></textarea>
+                        <div style="display:flex; justify-content:flex-end; margin-top:4px;">
+                            <span id="pv-desc-counter" style="font-size:0.625rem; text-transform:uppercase; letter-spacing:0.05rem; color:#a5abba; opacity:0.7; transition:color 0.2s;">200 characters left</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="display:block; font-size:0.6875rem; text-transform:uppercase; letter-spacing:0.05rem; color:#a5abba; margin-bottom:0.5rem; padding:0 4px;">Topics</label>
+                        <div id="pv-tag-input-wrap" onclick="document.getElementById('pv-tag-input-field').focus()">
+                            <input id="pv-tag-input-field" type="text" placeholder="Type a topic and press Enter…" maxlength="30"/>
+                        </div>
+                        <div style="display:flex; justify-content:flex-end; margin-top:6px;">
+                            <span id="pv-tags-counter" style="font-size:0.625rem; text-transform:uppercase; letter-spacing:0.05rem; color:#a5abba; opacity:0.7;">10 tags left</span>
+                        </div>
+                        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;">
+                            <span style="font-size:0.625rem; text-transform:uppercase; letter-spacing:0.05rem; color:#a5abba; opacity:0.5; width:100%; margin-bottom:2px;">Suggestions</span>
+                            <button class="pv-suggestion-btn" onclick="pvAddTag('Technology')">Technology</button>
+                            <button class="pv-suggestion-btn" onclick="pvAddTag('Programming')">Programming</button>
+                            <button class="pv-suggestion-btn" onclick="pvAddTag('Design')">Design</button>
+                            <button class="pv-suggestion-btn" onclick="pvAddTag('Life')">Life</button>
+                            <button class="pv-suggestion-btn" onclick="pvAddTag('Travel')">Travel</button>
+                            <button class="pv-suggestion-btn" onclick="pvAddTag('Cooking')">Cooking</button>
+                        </div>
+                    </div>
+
+                    <div style="padding-top:1.5rem;">
+                        <button style="width:100%; background:linear-gradient(to right, #ac8aff, #8f60fa); color:#280067; padding:1rem; border-radius:9999px; font-weight:600; font-size:1.125rem; border:none; cursor:pointer; transition:all 0.3s; box-shadow:0 8px 24px rgba(172,138,255,0.15);"
+                                onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='none'"
+                                onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1.02)'">
+                            Publish
+                        </button>
+                        <p style="text-align:center; font-size:0.6875rem; color:#a5abba; margin-top:1rem; text-transform:uppercase; letter-spacing:0.1rem;">
+                            Visibility: Public
+                        </p>
+                    </div>
+
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <div style="position:fixed; top:-10%; right:-10%; width:40%; height:40%; background:rgba(172,138,255,0.05); border-radius:9999px; filter:blur(120px); z-index:-1; pointer-events:none;"></div>
+    <div style="position:fixed; bottom:-5%; left:-5%; width:30%; height:30%; background:rgba(137,206,255,0.05); border-radius:9999px; filter:blur(100px); z-index:-1; pointer-events:none;"></div>
+
+</div><!-- end #view-preview -->
+
+
+<!-- Mobile block toolbar -->
+<div id="mob-block-toolbar">
+    <button class="mob-tb-btn" onclick="mobCmd('bullet')">
+        <span class="material-symbols-outlined">list</span>
+        <span>Bullet</span>
+    </button>
+    <button class="mob-tb-btn" onclick="mobCmd('numbered')">
+        <span class="material-symbols-outlined">format_list_numbered</span>
+        <span>Number</span>
+    </button>
+    <button class="mob-tb-btn" onclick="mobCmd('todo')">
+        <span class="material-symbols-outlined">check_box</span>
+        <span>Todo</span>
+    </button>
+    <div class="mob-tb-sep"></div>
+    <button class="mob-tb-btn" onclick="mobCmd('h1')">
+        <span class="material-symbols-outlined">title</span>
+        <span>H1</span>
+    </button>
+    <button class="mob-tb-btn" onclick="mobCmd('h2')">
+        <span class="material-symbols-outlined">format_h2</span>
+        <span>H2</span>
+    </button>
+    <button class="mob-tb-btn" onclick="mobCmd('quote')">
+        <span class="material-symbols-outlined">format_quote</span>
+        <span>Quote</span>
+    </button>
+    <div class="mob-tb-sep"></div>
+    <button class="mob-tb-btn" onclick="mobTriggerImage()">
+        <span class="material-symbols-outlined">image</span>
+        <span>Image</span>
+    </button>
+    <button class="mob-tb-btn" onclick="mobMoveBlock(-1)">
+        <span class="material-symbols-outlined">arrow_upward</span>
+        <span>Up</span>
+    </button>
+    <button class="mob-tb-btn" onclick="mobMoveBlock(1)">
+        <span class="material-symbols-outlined">arrow_downward</span>
+        <span>Down</span>
+    </button>
+</div>
+
+<!-- Slash menu -->
+<div id="slash-menu">
+    <div class="menu-section">Text</div>
+    <div class="menu-item" data-cmd="text"><div class="menu-icon"><span class="material-symbols-outlined">text_fields</span></div><div class="menu-item-text"><strong>Text</strong><span>Plain paragraph</span></div></div>
+    <div class="menu-item" data-cmd="h1"><div class="menu-icon"><span class="material-symbols-outlined">title</span></div><div class="menu-item-text"><strong>Heading 1</strong><span>Large section header</span></div></div>
+    <div class="menu-item" data-cmd="h2"><div class="menu-icon"><span class="material-symbols-outlined">format_h2</span></div><div class="menu-item-text"><strong>Heading 2</strong><span>Medium section header</span></div></div>
+    <div class="menu-item" data-cmd="h3"><div class="menu-icon"><span class="material-symbols-outlined">format_h3</span></div><div class="menu-item-text"><strong>Heading 3</strong><span>Small section header</span></div></div>
+    <div class="menu-section">Lists</div>
+    <div class="menu-item" data-cmd="bullet"><div class="menu-icon"><span class="material-symbols-outlined">list</span></div><div class="menu-item-text"><strong>Bulleted list</strong><span>Simple unordered list</span></div></div>
+    <div class="menu-item" data-cmd="numbered"><div class="menu-icon"><span class="material-symbols-outlined">format_list_numbered</span></div><div class="menu-item-text"><strong>Numbered list</strong><span>Ordered list</span></div></div>
+    <div class="menu-item" data-cmd="todo"><div class="menu-icon"><span class="material-symbols-outlined">check_box</span></div><div class="menu-item-text"><strong>To-do</strong><span>Track tasks with checkboxes</span></div></div>
+    <div class="menu-section">Media & More</div>
+    <div class="menu-item" data-cmd="quote"><div class="menu-icon"><span class="material-symbols-outlined">format_quote</span></div><div class="menu-item-text"><strong>Quote</strong><span>Callout quote</span></div></div>
+    <div class="menu-item" data-cmd="code"><div class="menu-icon"><span class="material-symbols-outlined">code</span></div><div class="menu-item-text"><strong>Code</strong><span>Code block</span></div></div>
+    <div class="menu-item" data-cmd="image"><div class="menu-icon"><span class="material-symbols-outlined">image</span></div><div class="menu-item-text"><strong>Image</strong><span>Upload from device</span></div></div>
+    <div class="menu-item" data-cmd="divider"><div class="menu-icon"><span class="material-symbols-outlined">horizontal_rule</span></div><div class="menu-item-text"><strong>Divider</strong><span>Visual separator</span></div></div>
+</div>
+
+<input type="file" id="block-img-input" class="hidden" accept="image/*"/>
+
+<script>
+    // ═══════════════════════════════════════════
+    //  SPA VIEW SWITCHER
+    // ═══════════════════════════════════════════
+    function showPreview() {
+        const bannerImg = document.getElementById('banner-img');
+        const pvBannerImg  = document.getElementById('pv-banner-img');
+        const pvBannerEmpty = document.getElementById('pv-banner-empty');
+        if (bannerImg.src && document.getElementById('banner-filled').classList.contains('hidden') === false) {
+            pvBannerImg.src = bannerImg.src;
+            pvBannerImg.style.display = 'block';
+            pvBannerEmpty.style.display = 'none';
+        } else {
+            pvBannerImg.style.display = 'none';
+            pvBannerEmpty.style.display = 'flex';
+        }
+        const title = document.getElementById('title-input').value || 'Untitled';
+        document.getElementById('pv-title').textContent = title;
+        document.getElementById('pv-form-title').value = title;
+        document.body.classList.add('show-preview');
+        window.scrollTo(0, 0);
+    }
+
+    function hidePreview() {
+        document.body.classList.remove('show-preview');
+        window.scrollTo(0, 0);
+    }
+
+    // ═══════════════════════════════════════════
+    //  PREVIEW: Tags
+    // ═══════════════════════════════════════════
+    const PV_MAX_TAGS = 10;
+    let pvTags = [];
+
+    function pvRenderTags() {
+        const wrap = document.getElementById('pv-tag-input-wrap');
+        wrap.querySelectorAll('.pv-tag-chip').forEach(c => c.remove());
+        pvTags.forEach((tag, i) => {
+            const chip = document.createElement('span');
+            chip.className = 'pv-tag-chip';
+            chip.innerHTML = `#${tag}<button type="button" onclick="pvRemoveTag(${i})"><span class="material-symbols-outlined">close</span></button>`;
+            wrap.insertBefore(chip, document.getElementById('pv-tag-input-field'));
+        });
+        const left = PV_MAX_TAGS - pvTags.length;
+        document.getElementById('pv-tags-counter').textContent = `${left} tag${left !== 1 ? 's' : ''} left`;
+        document.getElementById('pv-tag-input-field').style.display = pvTags.length >= PV_MAX_TAGS ? 'none' : '';
+    }
+
+    function pvAddTag(raw) {
+        const val = raw.trim().replace(/^#+/, '');
+        if (!val || pvTags.length >= PV_MAX_TAGS) return;
+        if (pvTags.map(t => t.toLowerCase()).includes(val.toLowerCase())) return;
+        pvTags.push(val);
+        document.getElementById('pv-tag-input-field').value = '';
+        pvRenderTags();
+        document.getElementById('pv-tag-input-field').focus();
+    }
+
+    function pvRemoveTag(idx) {
+        pvTags.splice(idx, 1);
+        pvRenderTags();
+        document.getElementById('pv-tag-input-field').focus();
+    }
+
+    document.getElementById('pv-tag-input-field').addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); pvAddTag(e.target.value); }
+        if (e.key === 'Backspace' && e.target.value === '' && pvTags.length > 0) pvRemoveTag(pvTags.length - 1);
+    });
+    document.getElementById('pv-tag-input-field').addEventListener('blur', e => {
+        if (e.target.value.trim()) pvAddTag(e.target.value);
+    });
+
+    // ═══════════════════════════════════════════
+    //  PREVIEW: Description counter
+    // ═══════════════════════════════════════════
+    function pvUpdateDesc(el) {
+        const left = 200 - el.value.length;
+        const counter = document.getElementById('pv-desc-counter');
+        counter.textContent = `${left} character${left !== 1 ? 's' : ''} left`;
+        counter.style.color = left < 20 ? '#fd6f85' : '';
+        document.getElementById('pv-desc').textContent = el.value ||
+            'Your content is looking great. Review the details on the right to finalize your publication settings.';
+    }
+
+    // ═══════════════════════════════════════════
+    //  EDITOR STATE
+    // ═══════════════════════════════════════════
+    const area          = document.getElementById('editor-area');
+    const slashMenu     = document.getElementById('slash-menu');
+    const menuItems     = [...slashMenu.querySelectorAll('.menu-item')];
+    const blockImgInput = document.getElementById('block-img-input');
+
+    let blocks = [];
+    let nextId = 1;
+    let activeBlockId = null;
+    let menuActiveIdx = 0;
+    let dragSrcId = null;
+
+    const PLACEHOLDERS = {
+        text:'Type \'/\' for commands or start your story…', h1:'Heading 1', h2:'Heading 2', h3:'Heading 3',
+        quote:'Quote…', code:'Code…', bullet:'List item…', numbered:'List item…', divider:'', todo:'', image:'',
+    };
+
+    function makeBlock(type='text', content='') { return { id: nextId++, type, content }; }
+
+    function renderAll() {
+        area.innerHTML = '';
+        let numIdx = 1;
+        blocks.forEach(b => {
+            const row = buildRow(b);
+            if (b.type === 'numbered') {
+                const el = row.querySelector('.block-content');
+                if (el) el.dataset.num = numIdx;
+                numIdx++;
+            } else { numIdx = 1; }
+            area.appendChild(row);
+        });
+    }
+
+    function buildRow(b) {
+        const row = document.createElement('div');
+        row.className = 'block-row';
+        row.dataset.id = b.id;
+        row.draggable = false;
+
+        const gutter = document.createElement('div');
+        gutter.className = 'block-gutter';
+
+        const addBtn = document.createElement('button');
+        addBtn.className = 'gutter-btn';
+        addBtn.innerHTML = '<span class="material-symbols-outlined">add</span>';
+        addBtn.title = 'Add block';
+        addBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            const isEmpty = !b.content || b.content.replace(/<[^>]*>/g, '').trim() === '';
+            if (isEmpty) {
+                activeBlockId = b.id; focusBlock(b.id); showMenuNearBtn(addBtn);
+            } else {
+                const idx = blocks.findIndex(x => x.id === b.id);
+                const nb  = makeBlock('text');
+                blocks.splice(idx + 1, 0, nb);
+                renderAll(); activeBlockId = nb.id; focusBlock(nb.id);
+                requestAnimationFrame(() => {
+                    const newRow = area.querySelector(`.block-row[data-id="${nb.id}"]`);
+                    showMenuNearBtn(newRow ? newRow.querySelector('.gutter-btn') : addBtn);
+                });
+            }
+        });
+
+        const dragBtn = document.createElement('button');
+        dragBtn.className = 'gutter-btn drag-handle';
+        dragBtn.innerHTML = '<span class="material-symbols-outlined">drag_indicator</span>';
+        dragBtn.title = 'Drag to reorder';
+        dragBtn.addEventListener('mousedown', () => { row.draggable = true; });
+        dragBtn.addEventListener('mouseup',   () => { row.draggable = false; });
+
+        gutter.appendChild(addBtn);
+        gutter.appendChild(dragBtn);
+        row.appendChild(gutter);
+
+        if (b.type === 'todo') {
+            row.appendChild(buildTodo(b));
+        } else if (b.type === 'image') {
+            row.appendChild(buildImageBlock(b));
+        } else if (b.type === 'divider') {
+            const hr = document.createElement('div');
+            hr.className = 'block-content';
+            hr.dataset.type = 'divider';
+            hr.style.cssText = 'border-top:1px solid #2D333B;margin:0.5rem 0;pointer-events:none;height:1px;';
+            row.appendChild(hr);
+        } else {
+            const el = document.createElement('div');
+            el.className = 'block-content';
+            el.dataset.type = b.type;
+            el.dataset.placeholder = PLACEHOLDERS[b.type] || '';
+            el.contentEditable = 'true';
+            el.innerHTML = b.content;
+            el.addEventListener('input',   () => { b.content = el.innerHTML; });
+            el.addEventListener('keydown', e => handleKey(e, b, el));
+            el.addEventListener('focus',   () => { activeBlockId = b.id; });
+            row.appendChild(el);
+        }
+
+        row.addEventListener('dragstart', e => { dragSrcId = b.id; row.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+        row.addEventListener('dragend',   () => { row.draggable = false; row.classList.remove('dragging'); area.querySelectorAll('.block-row').forEach(r => r.classList.remove('drag-over')); dragSrcId = null; });
+        row.addEventListener('dragover',  e => { if (dragSrcId === b.id) return; e.preventDefault(); area.querySelectorAll('.block-row').forEach(r => r.classList.remove('drag-over')); row.classList.add('drag-over'); });
+        row.addEventListener('drop',      e => { e.preventDefault(); if (dragSrcId == null || dragSrcId === b.id) return; const si = blocks.findIndex(x => x.id === dragSrcId); const di = blocks.findIndex(x => x.id === b.id); const [m] = blocks.splice(si,1); blocks.splice(di,0,m); renderAll(); });
+
+        return row;
+    }
+
+    function buildTodo(b) {
+        const wrap = document.createElement('div');
+        wrap.className = 'block-todo';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        const span = document.createElement('div');
+        span.className = 'todo-text';
+        span.contentEditable = 'true';
+        span.innerHTML = b.content;
+        span.addEventListener('input',   () => { b.content = span.innerHTML; });
+        span.addEventListener('focus',   () => { activeBlockId = b.id; });
+        span.addEventListener('keydown', e => handleKey(e, b, span));
+        wrap.appendChild(cb);
+        wrap.appendChild(span);
+        return wrap;
+    }
+
+    function buildImageBlock(b) {
+        const outer = document.createElement('div');
+        outer.className = 'block-image-outer';
+        const wrap = document.createElement('div');
+        wrap.className = 'block-image-wrap';
+
+        if (b.content) {
+            const img = document.createElement('img');
+            img.src = b.content;
+            wrap.appendChild(img);
+            const overlay = document.createElement('div');
+            overlay.className = 'img-overlay';
+            overlay.innerHTML = '<span class="material-symbols-outlined text-white">edit</span><span style="margin-left:6px">Change image</span>';
+            wrap.appendChild(overlay);
+            wrap.addEventListener('click', () => triggerImageUpload(b));
+        } else {
+            const ph = document.createElement('div');
+            ph.className = 'img-placeholder';
+            ph.innerHTML = '<span class="material-symbols-outlined">add_photo_alternate</span><span>Click to upload image</span>';
+            wrap.appendChild(ph);
+            wrap.addEventListener('click', () => triggerImageUpload(b));
+        }
+
+        outer.appendChild(wrap);
+
+        const caption = document.createElement('div');
+        caption.className = 'img-caption';
+        caption.contentEditable = 'true';
+        caption.innerHTML = b.caption || '';
+        caption.addEventListener('input',   () => { b.caption = caption.innerHTML; });
+        caption.addEventListener('focus',   () => { activeBlockId = b.id; });
+        caption.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                const idx = blocks.findIndex(x => x.id === b.id);
+                const nb  = makeBlock('text');
+                blocks.splice(idx+1, 0, nb);
+                renderAll();
+                focusBlock(nb.id);
+            }
+        });
+        outer.appendChild(caption);
+        return outer;
+    }
+
+    function triggerImageUpload(b) {
+        blockImgInput.value = '';
+        blockImgInput.onchange = e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => {
+                b.content = ev.target.result;
+                const row = area.querySelector(`.block-row[data-id="${b.id}"]`);
+                const oldOuter = row.querySelector('.block-image-outer');
+                row.replaceChild(buildImageBlock(b), oldOuter);
+            };
+            reader.readAsDataURL(file);
+        };
+        blockImgInput.click();
+    }
+
+    // ── Keyboard ──
+    const LIST_TYPES = ['bullet', 'numbered', 'todo'];
+
+    function handleKey(e, b, el) {
+        const idx = blocks.findIndex(x => x.id === b.id);
+
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            const isEmpty = getTextContent(el) === '';
+            if (LIST_TYPES.includes(b.type) && isEmpty) {
+                b.type = 'text'; b.content = ''; renderAll(); focusBlock(b.id);
+            } else if (LIST_TYPES.includes(b.type)) {
+                const nb = makeBlock(b.type); blocks.splice(idx+1,0,nb); renderAll(); focusBlock(nb.id);
+            } else {
+                const nb = makeBlock('text'); blocks.splice(idx+1,0,nb); renderAll(); focusBlock(nb.id);
+            }
+            return;
+        }
+
+        if (e.key === 'Backspace' && getTextContent(el) === '' && blocks.length > 1) {
+            e.preventDefault();
+            if (LIST_TYPES.includes(b.type)) {
+                b.type = 'text'; b.content = ''; renderAll(); focusBlock(b.id);
+            } else {
+                blocks.splice(idx, 1); renderAll(); focusBlock(blocks[Math.max(0, idx-1)].id);
+            }
+            return;
+        }
+
+        if (e.key === 'ArrowUp')   { if (idx > 0) { e.preventDefault(); focusBlock(blocks[idx-1].id); } return; }
+        if (e.key === 'ArrowDown') { if (idx < blocks.length-1) { e.preventDefault(); focusBlock(blocks[idx+1].id); } return; }
+
+        if (slashMenu.style.display === 'block') {
+            if (e.key === 'ArrowDown') { e.preventDefault(); setMenuActive((menuActiveIdx+1) % menuItems.length); return; }
+            if (e.key === 'ArrowUp')   { e.preventDefault(); setMenuActive((menuActiveIdx-1+menuItems.length) % menuItems.length); return; }
+            if (e.key === 'Enter')     { e.preventDefault(); applyCmd(menuItems[menuActiveIdx].dataset.cmd, b); return; }
+            if (e.key === 'Escape')    { hideMenu(); return; }
+        }
+
+        if (e.key === '/') { activeBlockId = b.id; setTimeout(() => showMenuNearCaret(), 0); }
+    }
+
+    function getTextContent(el) { return (el.textContent || el.innerText || '').trim(); }
+
+    // ── Slash menu ──
+    function showMenuNearBtn(btn) {
+        const rect = btn.getBoundingClientRect();
+        slashMenu.style.display = 'block'; menuActiveIdx = 0; setMenuActive(0);
+        const mw = 280, mh = slashMenu.offsetHeight || 360;
+        let left = rect.right + 4, top = rect.top;
+        if (left + mw > window.innerWidth - 8)  left = rect.left - mw - 4;
+        if (top  + mh > window.innerHeight - 8) top  = window.innerHeight - mh - 8;
+        slashMenu.style.left = left + 'px'; slashMenu.style.top = top + 'px';
+    }
+
+    function showMenuNearCaret() {
+        const sel = window.getSelection();
+        if (!sel.rangeCount) return;
+        const rect = sel.getRangeAt(0).getBoundingClientRect();
+        slashMenu.style.display = 'block'; menuActiveIdx = 0; setMenuActive(0);
+        const mw = 280, mh = slashMenu.offsetHeight || 360;
+        let left = rect.left, top = rect.bottom + 4;
+        if (left + mw > window.innerWidth - 8)  left = window.innerWidth - mw - 8;
+        if (top  + mh > window.innerHeight - 8) top  = rect.top - mh - 4;
+        slashMenu.style.left = left + 'px'; slashMenu.style.top = top + 'px';
+    }
+
+    function hideMenu() { slashMenu.style.display = 'none'; }
+
+    function setMenuActive(idx) {
+        menuItems.forEach((m, i) => m.classList.toggle('active', i === idx));
+        menuActiveIdx = idx;
+        menuItems[idx].scrollIntoView({ block: 'nearest' });
+    }
+
+    menuItems.forEach(item => {
+        item.addEventListener('mousedown', e => {
+            e.preventDefault();
+            const b = blocks.find(x => x.id === activeBlockId);
+            if (b) applyCmd(item.dataset.cmd, b);
+        });
+    });
+
+    function applyCmd(cmd, b) {
+        hideMenu();
+        b.content = b.content.replace(/\/\s*$/, '');
+        if (cmd === 'image') {
+            b.type = 'image'; b.content = ''; renderAll();
+            setTimeout(() => triggerImageUpload(b), 50);
+        } else if (cmd === 'divider') {
+            b.type = 'divider'; b.content = '';
+            const idx = blocks.findIndex(x => x.id === b.id);
+            const nb  = makeBlock('text');
+            blocks.splice(idx+1, 0, nb); renderAll(); focusBlock(nb.id);
+        } else {
+            b.type = cmd; renderAll(); focusBlock(b.id);
+        }
+    }
+
+    function focusBlock(id) {
+        const row = area.querySelector(`.block-row[data-id="${id}"]`);
+        if (!row) return;
+        const target = row.querySelector('[contenteditable="true"]');
+        if (!target) return;
+        target.focus();
+        const r = document.createRange();
+        r.selectNodeContents(target); r.collapse(false);
+        const sel = window.getSelection();
+        sel.removeAllRanges(); sel.addRange(r);
+    }
+
+    document.addEventListener('click', e => { if (!slashMenu.contains(e.target)) hideMenu(); });
+
+    // ── Banner ──
+    document.getElementById('banner-input').addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            document.getElementById('banner-img').src = ev.target.result;
+            document.getElementById('banner-empty').classList.add('hidden');
+            document.getElementById('banner-filled').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // ── Title sync ──
+    const titleInput = document.getElementById('title-input');
+    titleInput.addEventListener('input', () => {
+        document.getElementById('header-title').textContent = titleInput.value || 'Untitled';
+        titleInput.style.height = 'auto';
+        titleInput.style.height = titleInput.scrollHeight + 'px';
+    });
+
+    // ── Init ──
+    blocks.push(makeBlock('text'));
+    renderAll();
+    focusBlock(blocks[0].id);
+    pvRenderTags();
+
+    // ── Mobile toolbar ──
+    const mobToolbar = document.getElementById('mob-block-toolbar');
+    const isTouch = () => window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
+    function mobShowToolbar(blockId) {
+        if (!isTouch()) return;
+        activeBlockId = blockId;
+        mobToolbar.classList.add('visible');
+    }
+    function mobHideToolbar() { mobToolbar.classList.remove('visible'); }
+
+    function mobCmd(cmd) {
+        const b = blocks.find(x => x.id === activeBlockId);
+        if (!b) return;
+        if (cmd === b.type) { b.type = 'text'; renderAll(); focusBlock(b.id); }
+        else { b.type = cmd; renderAll(); focusBlock(b.id); }
+    }
+
+    function mobTriggerImage() {
+        const b = blocks.find(x => x.id === activeBlockId);
+        if (!b) return;
+        b.type = 'image'; b.content = '';
+        renderAll();
+        setTimeout(() => triggerImageUpload(b), 50);
+    }
+
+    function mobMoveBlock(dir) {
+        const idx = blocks.findIndex(x => x.id === activeBlockId);
+        if (idx < 0) return;
+        const newIdx = idx + dir;
+        if (newIdx < 0 || newIdx >= blocks.length) return;
+        const [moved] = blocks.splice(idx, 1);
+        blocks.splice(newIdx, 0, moved);
+        renderAll();
+        focusBlock(moved.id);
+    }
+
+    area.addEventListener('focusin', e => {
+        const row = e.target.closest('.block-row');
+        if (!row) return;
+        const id = Number(row.dataset.id);
+        if (isTouch()) mobShowToolbar(id);
+    });
+    area.addEventListener('focusout', e => {
+        setTimeout(() => {
+            if (!area.contains(document.activeElement) && !mobToolbar.contains(document.activeElement)) {
+                mobHideToolbar();
+            }
+        }, 150);
+    });
+    document.getElementById('banner-filled').addEventListener('click', () => {
+        if (isTouch()) document.getElementById('banner-input').click();
+    });
+</script>
 </body>
 </html>
