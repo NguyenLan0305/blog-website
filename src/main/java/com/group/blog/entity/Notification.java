@@ -38,6 +38,10 @@ public class Notification {
 
     LocalDateTime createdAt;
 
+    // TRƯỜNG NÀY ĐỂ FRONTEND BIẾT VẼ ICON GÌ
+    @Column(nullable = false)
+    String type; // Chứa các giá trị: "LIKE", "COMMENT", "REPLY", "FOLLOW"
+
     @PrePersist
     void prePersist(){
         if(createdAt == null){

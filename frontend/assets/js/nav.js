@@ -1,29 +1,24 @@
 /**
  * nav.js
- * Page navigation, nav link active state, brand click, auth state toggle
- * Search Logic (Debounce, History, Suggestion cho cả Desktop & Mobile)
- * Depends on: app.js (S, initials, callApi), pages.js, posts.js
+ * Page navigation, auth state toggle, Avatar Sync & Advanced Notification Logic
  */
 
 function navigate(page) {
     S.page = page;
 
-    // Ẩn tất cả các trang, chỉ hiện trang được chọn
     $('#p-home, #p-categories, #p-tags').hide();
     $('#p-' + page).show();
 
-    // Cập nhật trạng thái active trên menu
     $('[data-page]').removeClass('is-active');
     $('[data-page="' + page + '"]').addClass('is-active');
 
-    // Mở khóa các hàm này nếu bạn đã viết xong ở pages.js
     if (page === 'categories' && typeof buildCatPage === 'function') buildCatPage();
     if (page === 'tags' && typeof buildTagsPage === 'function') buildTagsPage();
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-/* ─────────────── AUTHENTICATION UI TOGGLE ─────────────── */
+/* ─────────────── AUTHENTICATION UI TOGGLE & AVATAR SYNC ─────────────── */
 function updateNavAuth() {
     const isAuth = S.isAuth;
     const uname = S.uname;
@@ -31,40 +26,87 @@ function updateNavAuth() {
     if (isAuth) {
         $('.nav-guest').attr('style', 'display: none !important');
         $('.nav-user').attr('style', 'display: flex !important');
-
         $('#nav-username, #mob-nav-username').text(uname);
 
-        const userInitials = typeof initials === 'function' ? initials(uname) : uname.charAt(0).toUpperCase();
-        $('#nav-avatar, #mob-nav-avatar').text(userInitials);
+        // 1. Lấy Avatar từ bộ nhớ đệm (giúp tải trang siêu nhanh, không bị nháy chữ cái đầu)
+        const savedAvatar = localStorage.getItem('avatarUrl');
+        if (savedAvatar) {
+            $('#nav-avatar, #mob-nav-avatar').html(`<img src="${savedAvatar}" alt="avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`);
+        } else {
+            const userInitials = typeof initials === 'function' ? initials(uname) : uname.charAt(0).toUpperCase();
+            $('#nav-avatar, #mob-nav-avatar').text(userInitials);
+        }
+
+        // 2. Gọi API ngầm để kiểm tra xem User có đổi Avatar hay không, nếu có thì Update lại
+        callApi('/users/my-profile', 'GET').done(function(res) {
+            if (res.result && res.result.avatarUrl && res.result.avatarUrl !== savedAvatar) {
+                localStorage.setItem('avatarUrl', res.result.avatarUrl);
+                $('#nav-avatar, #mob-nav-avatar').html(`<img src="${res.result.avatarUrl}" alt="avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`);
+            }
+        });
+
+        // 3. Kích hoạt đếm thông báo
+        checkUnreadNotifications();
     } else {
         $('.nav-guest').attr('style', 'display: flex !important');
         $('.nav-user').attr('style', 'display: none !important');
     }
 }
 
+/* ─────────────── LOGIC ĐẾM VÀ TẮT THÔNG BÁO THÔNG MINH ─────────────── */
+function checkUnreadNotifications() {
+    // Lấy thời điểm người dùng click vào chuông lần cuối cùng
+    const clearedTime = localStorage.getItem('notif_cleared_time') || 0;
+
+    callApi('/notifications', 'GET').done(function(res) {
+        const notifs = res.result || [];
+
+        // Đếm những thông báo: Chưa đọc VÀ Mới hơn lần cuối cùng click chuông
+        const unreadCount = notifs.filter(n => !n.read && new Date(n.createdAt).getTime() > clearedTime).length;
+
+        if (unreadCount > 0) {
+            $('#nav-notif-badge, #mob-notif-badge').text(unreadCount > 99 ? '99+' : unreadCount).removeClass('hidden').show();
+        } else {
+            $('#nav-notif-badge, #mob-notif-badge').hide().addClass('hidden');
+        }
+    });
+}
+
+// BẮT SỰ KIỆN: Khi người dùng CLICK VÀO QUẢ CHUÔNG ở Navbar / Mobile
+$(document).on('click', 'a[href="notifications.html"]', function() {
+    // Đánh dấu thời điểm hiện tại là "Đã xem tất cả"
+    localStorage.setItem('notif_cleared_time', Date.now());
+    // Ẩn chấm đỏ ngay lập tức cho mượt
+    $('#nav-notif-badge, #mob-notif-badge').hide().addClass('hidden');
+});
+
 /* ─────────────── EVENT LISTENERS CƠ BẢN ─────────────── */
 $(document).ready(function() {
-    if (typeof updateNavAuth === 'function') {
-        updateNavAuth();
+    if (typeof updateNavAuth === 'function') updateNavAuth();
+});
+
+$(document).on('click', '[data-page]', function(){ navigate($(this).data('page')); });
+
+$(document).on('click', '#nav-brand', function(e){
+    if (typeof handleEditorNavigation === 'function') {
+        e.preventDefault(); handleEditorNavigation(); return;
     }
-});
-
-$(document).on('click', '[data-page]', function(){
-    navigate($(this).data('page'));
-});
-
-$(document).on('click', '#nav-brand', function(){
-    navigate('home');
+    if ($('#p-home').length > 0) { navigate('home'); }
+    else { window.location.href = 'home-page.html'; }
 });
 
 $(document).on('click', '#btn-logout, #btn-mob-logout', function(e) {
     e.preventDefault();
 
+    // Xóa toàn bộ thông tin đăng nhập và cache
     localStorage.removeItem('token');
     localStorage.removeItem('username');
+    localStorage.removeItem('avatarUrl');
+    localStorage.removeItem('notif_cleared_time');
+
+    if (typeof S !== 'undefined') { S.isAuth = false; S.uname = null; }
 
     updateNavAuth();
-    navigate('home');
     toast("Đã đăng xuất thành công!");
 
     var mobMenuEl = document.getElementById('mob-menu');
@@ -72,39 +114,32 @@ $(document).on('click', '#btn-logout, #btn-mob-logout', function(e) {
         var mobMenu = bootstrap.Offcanvas.getInstance(mobMenuEl);
         if (mobMenu) mobMenu.hide();
     }
+
+    setTimeout(function() {
+        if ($('#p-home').length > 0) { navigate('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+        else { window.location.href = 'home-page.html'; }
+    }, 300);
 });
 
 /* ==========================================
-   LOGIC TÌM KIẾM: DEBOUNCE + HISTORY + SUGGESTION (BẢN CHUẨN)
+   LOGIC TÌM KIẾM
    ========================================== */
-
 let searchTimeout = null;
-
-// Lấy lịch sử từ LocalStorage (Tối đa 5 từ khóa)
-function getSearchHistory() {
-    return JSON.parse(localStorage.getItem('inkwell_history') || '[]');
-}
-
-// Lưu từ khóa mới vào Lịch sử
+function getSearchHistory() { return JSON.parse(localStorage.getItem('inkwell_history') || '[]'); }
 function saveSearchHistory(keyword) {
     if(!keyword) return;
     let history = getSearchHistory();
     history = history.filter(k => k.toLowerCase() !== keyword.toLowerCase());
-    history.unshift(keyword); // Thêm vào đầu mảng
+    history.unshift(keyword);
     if(history.length > 5) history.pop();
     localStorage.setItem('inkwell_history', JSON.stringify(history));
 }
 
-// Hàm render Dropdown (Thông minh: Biết truyền vào $dd nào)
 function renderSearchDropdown($dd, keyword, suggestions = []) {
     $dd.empty();
-
     if (!keyword) {
-        // TRƯỜNG HỢP 1: TRỐNG -> Hiện Lịch sử
         const history = getSearchHistory();
-        if (history.length === 0) {
-            $dd.hide(); return;
-        }
+        if (history.length === 0) { $dd.hide(); return; }
         $dd.append('<div class="sd-title">Recent Searches</div>');
         history.forEach(h => {
             $dd.append(`
@@ -115,13 +150,11 @@ function renderSearchDropdown($dd, keyword, suggestions = []) {
             `);
         });
     } else {
-        // TRƯỜNG HỢP 2: ĐANG GÕ -> Hiện Gợi ý
         $dd.append('<div class="sd-title">Suggestions</div>');
         if (suggestions.length === 0) {
             $dd.append('<div class="px-3 py-2 text-muted" style="font-size:0.85rem;">Không tìm thấy kết quả nào.</div>');
         } else {
             suggestions.forEach(b => {
-                // 🔥 SỬA Ở ĐÂY: Đổi thẻ <a> thành thẻ <div> (class="btn-suggestion") để không bị nhảy trang
                 $dd.append(`
                     <div class="sd-item text-decoration-none d-flex align-items-center btn-suggestion" data-title="${b.title}">
                         <div style="background: rgba(124,111,247,0.1); border-radius: 6px; padding: 6px; margin-right: 12px;">
@@ -141,64 +174,45 @@ function renderSearchDropdown($dd, keyword, suggestions = []) {
     $dd.show();
 }
 
-// 1. Lắng nghe sự kiện GÕ PHÍM trên CẢ 2 Ô
 $(document).on('input', '#nav-search-input, #mob-search-input', function() {
     clearTimeout(searchTimeout);
     const keyword = $(this).val().trim();
-
     const isMobile = $(this).attr('id') === 'mob-search-input';
     const $dd = isMobile ? $('#mob-search-dropdown') : $('#desk-search-dropdown');
 
-    if (keyword.length === 0) {
-        renderSearchDropdown($dd, '');
-        return;
-    }
+    if (keyword.length === 0) { renderSearchDropdown($dd, ''); return; }
 
     searchTimeout = setTimeout(() => {
         callApi('/blogs/search/suggestions?keyword=' + encodeURIComponent(keyword), 'GET')
-            .done(function(res) {
-                renderSearchDropdown($dd, keyword, res.result || res);
-            });
+            .done(function(res) { renderSearchDropdown($dd, keyword, res.result || res); });
     }, 300);
 });
 
-// 2. Click vào ô Input -> Hiện lịch sử
 $(document).on('focus', '#nav-search-input, #mob-search-input', function() {
     const keyword = $(this).val().trim();
     const isMobile = $(this).attr('id') === 'mob-search-input';
     const $dd = isMobile ? $('#mob-search-dropdown') : $('#desk-search-dropdown');
-
     if (keyword.length === 0) renderSearchDropdown($dd, '');
 });
 
-// 3. Ẩn Dropdown khi click ra ngoài
 $(document).on('click', function(e) {
     if (!$(e.target).closest('.search-wrapper').length) {
         $('#desk-search-dropdown, #mob-search-dropdown').hide();
     }
 });
 
-// 4. BẮT SỰ KIỆN: BẤM ENTER HOẶC CLICK VÀO LỊCH SỬ / GỢI Ý ĐỂ LỌC DANH SÁCH
 function executeSearch(keyword) {
     if(!keyword) return;
-
-    // Điền chữ vào ô input
     $('#nav-search-input, #mob-search-input').val(keyword);
-
     saveSearchHistory(keyword);
     $('#desk-search-dropdown, #mob-search-dropdown').hide();
 
-    // Lưu vào State và Đổi URL (Dùng ?q= thay vì /search để tránh lỗi 404 trên IntelliJ)
-    S.keyword = keyword;
-    S.cat = null;
-    S.tag = null;
+    S.keyword = keyword; S.cat = null; S.tag = null;
     window.history.pushState({}, '', '?q=' + encodeURIComponent(keyword));
 
-    // Ra lệnh nạp lại Lưới bài viết ở dưới
     if (typeof renderCatTabs === 'function') renderCatTabs();
     if (typeof renderPosts === 'function') renderPosts();
 
-    // Tự đóng menu Mobile nếu đang tìm bằng đt
     var mobMenuEl = document.getElementById('mob-menu');
     if (mobMenuEl && typeof bootstrap !== 'undefined') {
         var mobMenu = bootstrap.Offcanvas.getInstance(mobMenuEl);
@@ -206,20 +220,9 @@ function executeSearch(keyword) {
     }
 }
 
-// Khi nhấn Enter
 $(document).on('keypress', '#nav-search-input, #mob-search-input', function(e) {
-    if (e.which === 13) {
-        e.preventDefault();
-        executeSearch($(this).val().trim());
-    }
+    if (e.which === 13) { e.preventDefault(); executeSearch($(this).val().trim()); }
 });
 
-// Khi bấm vào 1 dòng Lịch sử
-$(document).on('click', '.btn-history', function() {
-    executeSearch($(this).data('key'));
-});
-
-// 🔥 Khi bấm vào 1 dòng Gợi ý (Đổi logic: Lọc danh sách thay vì chuyển trang)
-$(document).on('click', '.btn-suggestion', function() {
-    executeSearch($(this).data('title'));
-});
+$(document).on('click', '.btn-history', function() { executeSearch($(this).data('key')); });
+$(document).on('click', '.btn-suggestion', function() { executeSearch($(this).data('title')); });

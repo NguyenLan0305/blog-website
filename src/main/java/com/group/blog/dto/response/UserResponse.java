@@ -22,4 +22,7 @@ public class UserResponse {
     String avatarUrl;
     Set<String> roles;
     LocalDateTime createdAt;
+    long totalFollowers;
+    long totalFollowing;
+    boolean isFollowedByCurrentUser; // Dùng để đổi màu nút Follow / Unfollow
 }

@@ -11,183 +11,164 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="../assets/css/main.css"/>
 
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "on-tertiary": "#436713", "inverse-primary": "#6e3bd7", "primary-fixed": "#cbb6ff",
-                        "on-tertiary-fixed": "#2c4b00", "tertiary-fixed": "#c9f791", "surface-container-lowest": "#000000",
-                        "on-error": "#490013", "background": "#0b0e14", "secondary-container": "#00293e",
-                        "on-secondary-fixed-variant": "#00628c", "secondary-fixed-dim": "#aadaff", "surface-container-low": "#10131b",
-                        "inverse-surface": "#f9f9ff", "on-secondary-container": "#27aef2", "primary-container": "#8f60fa",
-                        "on-surface": "#e0e5f5", "on-error-container": "#ff97a3", "primary": "#ac8aff",
-                        "surface-bright": "#262c39", "surface-tint": "#ac8aff", "on-surface-variant": "#a5abba",
-                        "tertiary-container": "#c9f791", "on-tertiary-container": "#3b5f08", "surface-container-highest": "#202631",
-                        "error": "#fd6f85", "secondary-fixed": "#c9e6ff", "surface-dim": "#0b0e14",
-                        "on-primary-fixed": "#31007b", "secondary": "#89ceff", "on-tertiary-fixed-variant": "#446914",
-                        "on-primary-container": "#000000", "tertiary": "#e7ffc5", "tertiary-dim": "#bbe885",
-                        "outline-variant": "#424855", "surface": "#0b0e14", "error-dim": "#c8475d",
-                        "secondary-dim": "#34b5fa", "surface-container-high": "#1b202a", "primary-fixed-dim": "#bfa5ff",
-                        "error-container": "#8a1632", "on-primary": "#280067", "outline": "#707583",
-                        "tertiary-fixed-dim": "#bbe885", "primary-dim": "#8455ef", "on-secondary-fixed": "#004463",
-                        "surface-variant": "#202631", "on-secondary": "#004564", "on-background": "#e0e5f5",
-                        "on-primary-fixed-variant": "#5313bd", "surface-container": "#151a22", "inverse-on-surface": "#52555c"
-                    },
-                    fontFamily: { "headline": ["Newsreader"], "body": ["Inter"], "label": ["Inter"] },
-                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
-                },
-            },
-        }
-    </script>
     <style>
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
         body { background-color: #0b0e14 !important; color: #e0e5f5; font-family: 'Inter', sans-serif; margin: 0; }
         ::-webkit-scrollbar { display: none; }
         html { -ms-overflow-style: none; scrollbar-width: none; }
-
-        #navbar-container { position: fixed; top: 0; width: 100%; z-index: 1050; background: #0b0e14; }
-        aside { top: 72px !important; height: calc(100vh - 72px) !important; z-index: 1040; }
-        main { padding-top: 100px !important; }
+        #navbar-container { position: fixed; top: 0; width: 100%; z-index: 1050; background: #0b0e14; border-bottom: 1px solid rgba(66,72,85,0.15);}
         .no-underline { text-decoration: none !important; }
     </style>
 </head>
-<body class="overflow-x-hidden">
+<body class="overflow-x-hidden bg-background no-global-search">
 
 <div id="navbar-container"></div>
 
-<aside class="w-64 fixed left-0 bg-[#0b0e14] flex flex-col py-8 px-6 space-y-8 border-r border-[#424855]/15">
-    <div class="px-2">
-        <h3 class="font-['Newsreader'] text-xl text-[#e0e5f5] italic">Editorial Studio</h3>
-    </div>
-    <nav class="flex-1 overflow-y-auto space-y-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        <div class="space-y-2">
-            <p class="px-4 text-[10px] font-bold text-[#a5abba]/50 uppercase tracking-[0.2em]">Dashboard</p>
-            <div class="space-y-1">
-                <a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#a5abba] hover:bg-[#10131b] hover:text-[#e0e5f5] no-underline transition-all font-['Inter'] text-sm uppercase" href="Manage-Blogs.html">
-                    <span class="material-symbols-outlined">article</span>
-                    <span>Blog</span>
-                </a>
-                <a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#a5abba] hover:bg-[#10131b] hover:text-[#e0e5f5] no-underline transition-all font-['Inter'] text-sm uppercase" href="notifications.html">
-                    <span class="material-symbols-outlined">notifications</span>
-                    <span>Notifications</span>
-                </a>
-                <a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#a5abba] hover:bg-[#10131b] hover:text-[#e0e5f5] no-underline transition-all font-['Inter'] text-sm uppercase" href="#">
-                    <span class="material-symbols-outlined">edit_note</span>
-                    <span>Write</span>
-                </a>
-            </div>
-        </div>
-        <div class="space-y-2">
-            <p class="px-4 text-[10px] font-bold text-[#a5abba]/50 uppercase tracking-[0.2em]">Settings</p>
-            <div class="space-y-1">
-                <a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#ac8aff] border-r-2 border-[#ac8aff] bg-gradient-to-r from-[#ac8aff]/10 to-transparent no-underline font-['Inter'] text-sm uppercase font-bold" href="#">
-                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">manage_accounts</span>
-                    <span>Edit Profile</span>
-                </a>
-                <a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#a5abba] hover:bg-[#10131b] no-underline transition-all font-['Inter'] text-sm uppercase" href="change-password.html">
-                    <span class="material-symbols-outlined">lock_reset</span>
-                    <span>Change Password</span>
-                </a>
-            </div>
-        </div>
-    </nav>
-    <div class="mt-auto space-y-2">
-        <a class="flex items-center gap-3 px-4 py-2 text-[#a5abba] hover:text-[#e0e5f5] no-underline text-xs transition-colors" href="#">
-            <span class="material-symbols-outlined text-lg">logout</span>
-            <span>Sign Out</span>
-        </a>
-    </div>
-</aside>
+<div id="dashboard-sidebar-container"></div>
 
-<main class="ml-64 px-12 pb-20">
-    <div class="max-w-4xl mx-auto">
-        <header class="mb-12">
-            <h1 class="font-['Newsreader'] text-5xl italic font-bold text-[#e0e5f5] tracking-tight mb-2">Edit Profile</h1>
+<main class="md:ml-64 px-6 md:px-12 pb-20 min-h-screen" style="padding-top: 100px;">
+    <div class="max-w-4xl mx-auto w-full">
+        <header class="mb-12 border-b border-[#424855]/20 pb-4">
+            <h1 class="font-['Newsreader'] text-4xl md:text-5xl italic font-bold text-[#e0e5f5] tracking-tight mb-2">Edit Profile</h1>
             <p class="text-[#a5abba] font-['Inter']">Manage your public identity and editorial presence.</p>
         </header>
+
         <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
             <div class="md:col-span-4 flex flex-col items-center">
-                <div class="bg-surface-container-low p-8 rounded-xl w-full flex flex-col items-center text-center shadow-[0_20px_40px_rgba(0,0_0,0.3)]">
+                <div class="bg-[#10131b] p-8 rounded-xl w-full flex flex-col items-center text-center shadow-[0_20px_40px_rgba(0,0_0,0.3)]">
                     <div class="relative group">
-                        <div class="h-40 w-40 rounded-full overflow-hidden border-4 border-primary/20 ring-4 ring-background shadow-2xl">
-                            <img alt="Profile image" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAVnvVYj2RSdGyMq-7sJLGqKe_NeOVjzGuIla7f90KrzevoRi3YVF1XMqs5xj370uZ5W4re4AzvBloKiKjbMuV6ilYS416Kin_GMR5U5NISqXo1gJJKjMM6t4SRuTKH7xoJxf_w_3X43jMuMGTdoDnlw0WmHO8fQyttH6-mcm_fMvtUXZGZysMEkDQDEPCsV9aS-_Y5vr5XjJ0t2VY-NGGMMXIQFwX6sPEHv_yMA8zVNKrNHoQZXX00xtvgziBkspOL-y4e_4B2gw">
+                        <div class="h-40 w-40 rounded-full overflow-hidden border-4 border-[#ac8aff]/20 ring-4 ring-[#0b0e14] shadow-2xl">
+                            <img id="avatar-img" alt="Profile image" class="w-full h-full object-cover" src="https://placehold.co/400x400/151a22/a5abba?text=Avatar">
                         </div>
                         <label class="absolute bottom-1 right-1 h-10 w-10 bg-[#7C3AED] rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:brightness-110 transition-all group-hover:scale-110 duration-200">
                             <span class="material-symbols-outlined text-white text-xl">upload</span>
-                            <input class="hidden" type="file">
+                            <input id="avatar-upload" class="hidden" type="file" accept="image/*">
                         </label>
                     </div>
                     <h3 class="mt-6 font-['Inter'] font-semibold text-[#e0e5f5]">Avatar</h3>
                     <p class="text-xs text-[#a5abba] mt-2 mb-6">JPG, GIF or PNG. 1MB Max.</p>
-                    <button class="w-full py-2 border border-outline-variant rounded-full text-xs font-['Inter'] uppercase tracking-widest hover:bg-surface-container-high transition-colors">
-                        Change Image
-                    </button>
                 </div>
             </div>
+
             <div class="md:col-span-8">
-                <div class="bg-surface-container-low p-10 rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.3)] border border-outline-variant/10">
-                    <form class="space-y-8">
+                <div class="bg-[#10131b] p-6 md:p-10 rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.3)] border border-[#424855]/10">
+                    <form id="form-edit-profile" class="space-y-8">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="space-y-2">
                                 <label class="block text-[10px] font-['Inter'] font-bold text-[#a5abba] uppercase tracking-[0.1em]">Username</label>
                                 <div class="relative">
-                                    <input class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#7C3AED] focus:border-transparent outline-none transition-all placeholder-[#a5abba]/30" placeholder="Parics" type="text" value="kunaal">
+                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[#a5abba] font-bold">@</span>
+                                    <input id="input-username" readonly class="w-full bg-[#0b0e14] border border-[#424855]/30 rounded-lg pl-8 pr-4 py-3 text-sm text-[#a5abba] cursor-not-allowed outline-none" type="text" value="Đang tải...">
                                 </div>
+                                <p class="text-[10px] text-[#a5abba]/50">Username is unique and cannot be changed.</p>
                             </div>
+
                             <div class="space-y-2">
-                                <label class="block text-[10px] font-['Inter'] font-bold text-[#a5abba] uppercase tracking-[0.1em]">ID</label>
-                                <div class="relative">
-                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[#7C3AED] font-bold">@</span>
-                                    <input class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg pl-8 pr-4 py-3 text-sm focus:ring-2 focus:ring-[#7C3AED] focus:border-transparent outline-none transition-all" placeholder="caixxoongg" type="text" value="kunaal123">
-                                </div>
+                                <label class="block text-[10px] font-['Inter'] font-bold text-[#a5abba] uppercase tracking-[0.1em]">Email Address</label>
+                                <input id="input-email" required class="w-full bg-[#000] border border-[#424855]/30 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#7C3AED] focus:border-transparent outline-none transition-all text-white" placeholder="your.email@example.com" type="email">
                             </div>
                         </div>
-                        <div class="space-y-2">
-                            <label class="block text-[10px] font-['Inter'] font-bold text-[#a5abba] uppercase tracking-[0.1em]">Email Address</label>
-                            <input class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#7C3AED] focus:border-transparent outline-none transition-all" placeholder="caixxoongg@gmail.com" type="email" value="kunaal@gmail.com">
-                            <p class="text-[10px] text-secondary/70">Verified primary email for account security.</p>
-                        </div>
+
                         <div class="space-y-2">
                             <label class="block text-[10px] font-['Inter'] font-bold text-[#a5abba] uppercase tracking-[0.1em]">About Me</label>
-                            <textarea class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#7C3AED] focus:border-transparent outline-none transition-all resize-none" rows="5">This is a test profile.</textarea>
+                            <textarea id="input-bio" class="w-full bg-[#000] border border-[#424855]/30 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#7C3AED] focus:border-transparent outline-none transition-all resize-none text-white" rows="5" placeholder="Tell us a little bit about yourself..."></textarea>
                         </div>
-                        <div class="pt-6 flex items-center justify-between border-t border-outline-variant/10 mt-8">
-                            <button class="text-xs font-bold text-error uppercase tracking-widest hover:underline decoration-2 underline-offset-4" type="button">Delete Account</button>
+
+                        <div class="pt-6 flex items-center justify-end border-t border-[#424855]/10 mt-8">
                             <div class="flex gap-4">
-                                <button class="px-6 py-3 rounded-full text-xs font-bold text-[#a5abba] uppercase tracking-widest hover:text-[#e0e5f5] transition-colors" type="button">Cancel</button>
-                                <button class="px-10 py-3 bg-gradient-to-r from-[#7C3AED] to-[#ac8aff] text-white font-bold rounded-full text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-transform" type="submit">Update</button>
+                                <button id="btn-submit" class="px-10 py-3 bg-gradient-to-r from-[#7C3AED] to-[#ac8aff] text-white font-bold rounded-full text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all flex items-center gap-2 border-none" type="submit">
+                                    <span>Update Profile</span>
+                                </button>
                             </div>
                         </div>
                     </form>
-                </div>
-                <div class="mt-8 flex gap-8">
-                    <div class="flex-1 bg-surface-container-high rounded-xl p-6 relative overflow-hidden group">
-                        <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform duration-500"><span class="material-symbols-outlined text-9xl">article</span></div>
-                        <h4 class="text-sm font-['Newsreader'] italic text-[#7C3AED] text-lg">Platform Tips</h4>
-                        <p class="text-xs text-[#a5abba] mt-2 leading-relaxed">Profiles with a complete bio and real name tend to get 40% more engagement.</p>
-                    </div>
-                    <div class="flex-1 bg-[#e7ffc5]/5 border border-[#e7ffc5]/10 rounded-xl p-6">
-                        <h4 class="text-sm font-['Inter'] font-bold text-tertiary uppercase tracking-wider">Privacy</h4>
-                        <p class="text-xs text-[#a5abba] mt-2 leading-relaxed">Your email is hidden from the public. Only your handle and bio are visible.</p>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 </main>
 
+<div id="toasts"></div>
+
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/app.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/nav.js"></script>
 
 <script>
+    let currentAvatarData = null;
+
     $(document).ready(function() {
         $('#navbar-container').load('../fragments/navbar.html', function() {
             if (typeof updateNavAuth === 'function') { updateNavAuth(); }
         });
+
+        // LOAD SIDEBAR
+        $('#dashboard-sidebar-container').load('../fragments/dashboard-sidebar.html');
+
+        if (S.isAuth) { loadProfileData(); }
+        else { window.location.href = 'login.html'; }
+    });
+
+    function loadProfileData() {
+        callApi('/users/my-profile', 'GET').done(function(res) {
+            const user = res.result;
+            $('#input-username').val(user.username);
+            $('#input-email').val(user.email || '');
+            $('#input-bio').val(user.bio || '');
+
+            if (user.avatarUrl) {
+                $('#avatar-img').attr('src', user.avatarUrl);
+                currentAvatarData = user.avatarUrl;
+            }
+        }).fail(function() {
+            toast('Không thể tải thông tin cá nhân!');
+        });
+    }
+
+    $('#avatar-upload').on('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (file.size > 1024 * 1024) {
+            alert('Vui lòng chọn ảnh kích thước dưới 1MB!');
+            this.value = ''; return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            currentAvatarData = event.target.result;
+            $('#avatar-img').attr('src', currentAvatarData);
+        };
+        reader.readAsDataURL(file);
+    });
+
+    $('#form-edit-profile').on('submit', function(e) {
+        e.preventDefault();
+
+        const btn = $('#btn-submit');
+        const originalText = btn.html();
+        btn.html('<span class="material-symbols-outlined" style="animation: spin 1s linear infinite;">sync</span> Updating...');
+        btn.prop('disabled', true).css('opacity', '0.7');
+
+        const requestBody = {
+            email: $('#input-email').val().trim(),
+            bio: $('#input-bio').val().trim(),
+            avatarUrl: currentAvatarData
+        };
+
+        callApi('/users/my-profile', 'PUT', requestBody)
+            .done(function() { toast('Cập nhật Profile thành công!'); })
+            .fail(function(xhr) {
+                let errorMsg = 'Lỗi cập nhật. Vui lòng kiểm tra lại!';
+                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
+                alert(errorMsg);
+            })
+            .always(function() {
+                btn.html(originalText);
+                btn.prop('disabled', false).css('opacity', '1');
+            });
     });
 </script>
 </body>

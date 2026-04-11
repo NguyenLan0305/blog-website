@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>User Profile — Bleb</title>
+    <title>User Profile | Inkwell</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link rel="stylesheet" type="text/css" href="../assets/css/main.css"/>
@@ -22,239 +22,71 @@
             --on-surface-variant:    #a5abba;
             --outline-variant:       #424855;
             --primary:               #ac8aff;
-            --primary-container:     #8f60fa;
-            --on-primary-container:  #000000;
         }
 
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        body { background-color: var(--surface); color: var(--on-surface); font-family: 'Inter', sans-serif; }
+        a { text-decoration: none !important; }
 
-        body {
-            background-color: var(--surface);
-            color: var(--on-surface);
-            font-family: 'Inter', sans-serif;
-        }
+        /* ── Typography & Layout ── */
+        .section-title { font-family: 'Newsreader', serif; font-size: 2rem; font-weight: bold; color: var(--on-surface); }
+        .title-bar { height: 2px; width: 3rem; background-color: var(--primary); margin-top: 0.5rem; margin-bottom: 2rem; }
 
-        /* ── Blog section ── */
-        .section-title {
-            font-family: 'Newsreader', serif;
-            font-style: italic;
-            font-size: 2.25rem;
-            color: var(--on-surface);
-            letter-spacing: -0.02em;
-        }
+        /* ── Profile card (Right) ── */
+        .avatar-ring { width: 7rem; height: 7rem; border-radius: 50%; border: 2px solid rgba(172,138,255,0.3); padding: 4px; margin-bottom: 1rem; }
+        .avatar-ring img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .profile-name { font-family: 'Newsreader', serif; font-size: 1.5rem; font-weight: bold; color: var(--on-surface); }
+        .profile-handle { color: var(--on-surface-variant); font-size: 0.875rem; margin-top: 0.25rem; }
 
-        .title-bar {
-            height: 3px;
-            width: 4rem;
-            background-color: var(--primary);
-            border-radius: 2px;
-            margin-top: 0.5rem;
-        }
+        .stats-row { display: flex; align-items: center; justify-content: center; gap: 1.5rem; margin: 1.5rem 0; }
+        .stat-item { text-align: center; cursor: pointer; padding: 0.5rem; border-radius: 8px; transition: background 0.2s; }
+        .stat-item:hover { background: rgba(255,255,255,0.05); }
+        .stat-value { font-family: 'Newsreader', serif; font-size: 1.25rem; font-weight: bold; color: var(--on-surface); display: block;}
+        .stat-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--on-surface-variant); }
 
-        .empty-state {
-            background-color: var(--surface-container-low);
-            border: 1px solid rgba(66,72,85,0.15);
-            border-radius: 0.75rem;
-            padding: 5rem 3rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
+        .bio-text { font-size: 0.875rem; color: var(--on-surface-variant); line-height: 1.6; margin-bottom: 1.5rem; text-align: center; }
+        .joined-row { color: var(--on-surface-variant); font-size: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem; margin-top: 1.5rem; opacity: 0.7; }
 
-        .empty-icon-wrap {
-            width: 5rem;
-            height: 5rem;
-            border-radius: 50%;
-            background-color: var(--surface-variant);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-        }
+        /* ── Buttons ── */
+        .btn-action { width: 100%; padding: 0.6rem; border-radius: 9999px; font-weight: 600; font-size: 0.875rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s; cursor: pointer; }
+        .btn-edit { border: 1px solid var(--outline-variant); color: var(--on-surface); background: transparent; }
+        .btn-edit:hover { background: var(--surface-variant); }
 
-        .empty-icon-wrap .material-symbols-outlined {
-            font-size: 2.5rem;
-            color: var(--on-surface-variant);
-        }
+        .btn-follow { border: none; color: #000; background: var(--on-surface); }
+        .btn-follow:hover { opacity: 0.9; }
 
-        .empty-state h3 {
-            font-family: 'Newsreader', serif;
-            font-size: 1.5rem;
-            color: var(--on-surface);
-            margin-bottom: 0.5rem;
-        }
+        .btn-unfollow { border: 1px solid var(--outline-variant); color: var(--on-surface); background: transparent; }
+        .btn-unfollow:hover { border-color: #ef4444; color: #ef4444; }
+        /* Trick: Hover vào nút Đang theo dõi thì đổi chữ thành Hủy theo dõi */
+        .btn-unfollow:hover span.follow-text { display: none; }
+        .btn-unfollow:hover::after { content: 'Unfollow'; }
 
-        .empty-state p {
-            color: var(--on-surface-variant);
-            max-width: 18rem;
-            line-height: 1.6;
-        }
+        .empty-state { text-align: center; padding: 4rem 0; color: var(--on-surface-variant); }
 
-        .btn-create {
-            margin-top: 2rem;
-            padding: 0.75rem 2rem;
-            border-radius: 9999px;
-            background: linear-gradient(to right, var(--primary), var(--primary-container));
-            color: var(--on-primary-container);
-            font-weight: 600;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: opacity 0.2s;
-        }
-        .btn-create:hover { opacity: 0.9; color: var(--on-primary-container); }
+        /* Skeleton loading animation */
+        .sk { background: linear-gradient(90deg, #1b202a 25%, #202631 50%, #1b202a 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 4px; }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-        /* ── Profile card ── */
-        .avatar-ring {
-            width: 8rem;
-            height: 8rem;
-            border-radius: 50%;
-            border: 2px solid rgba(172,138,255,0.3);
-            padding: 4px;
-            margin-bottom: 1.5rem;
-        }
-        .avatar-ring img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-        }
+        /* ── CSS cho Modal Follow ── */
+        .modal-content { background-color: var(--surface-container); border: 1px solid var(--outline-variant); color: var(--on-surface); }
+        .modal-header { border-bottom: 1px solid rgba(66,72,85,0.3); }
+        .search-user-input { background: var(--surface); border: 1px solid var(--outline-variant); color: var(--on-surface); padding: 0.6rem 1rem; border-radius: 99px; width: 100%; outline: none; margin-bottom: 1rem; }
+        .search-user-input:focus { border-color: var(--primary); }
 
-        .profile-name {
-            font-family: 'Newsreader', serif;
-            font-size: 1.875rem;
-            color: var(--on-surface);
-        }
-        .profile-handle {
-            color: var(--primary);
-            font-family: monospace;
-            font-size: 0.875rem;
-            letter-spacing: -0.05em;
-            opacity: 0.8;
-        }
+        .user-list-item { display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 0; border-bottom: 1px solid rgba(66,72,85,0.15); }
+        .user-list-item:last-child { border-bottom: none; }
+        .user-list-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .btn-sm-follow { padding: 0.3rem 1rem; font-size: 0.8rem; border-radius: 99px; cursor: pointer; font-weight: 500; transition: all 0.2s;}
+        .btn-sm-follow.is-following { border: 1px solid var(--outline-variant); background: transparent; color: var(--on-surface); }
+        .btn-sm-follow.is-following:hover { border-color: #ef4444; color: #ef4444; }
+        .btn-sm-follow.is-following:hover span { display: none; }
+        .btn-sm-follow.is-following:hover::after { content: 'Unfollow'; }
 
-        .stats-row {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            padding: 1rem 1.5rem;
-            border-radius: 9999px;
-            margin-bottom: 2rem;
-        }
-        .stat-item { text-align: center; }
-        .stat-value {
-            display: block;
-            font-family: 'Newsreader', serif;
-            font-size: 1.25rem;
-            color: var(--on-surface);
-        }
-        .stat-label {
-            font-size: 0.625rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--on-surface-variant);
-        }
-        .stat-divider { color: rgba(172,138,255,0.3); }
-
-        .bio-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--on-surface-variant);
-            opacity: 0.6;
-        }
-        .bio-text {
-            font-style: italic;
-            font-size: 0.875rem;
-            color: var(--on-surface);
-            line-height: 1.6;
-            border-left: 2px solid rgba(172,138,255,0.2);
-            padding-left: 1rem;
-        }
-
-        .btn-edit-profile {
-            width: 100%;
-            padding: 0.75rem;
-            border-radius: 9999px;
-            border: 1px solid rgba(172,138,255,0.3);
-            color: var(--primary);
-            background: transparent;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            transition: background 0.2s;
-        }
-        .btn-edit-profile:hover { background: rgba(172,138,255,0.05); color: var(--primary); }
-
-        .joined-row {
-            padding-top: 1.5rem;
-            border-top: 1px solid rgba(66,72,85,0.15);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            color: var(--on-surface-variant);
-            font-size: 0.75rem;
-        }
-        .joined-row .material-symbols-outlined { font-size: 0.75rem; }
-
-        /* ── Quote card ── */
-        .quote-card {
-            padding: 2rem;
-            border-radius: 0.75rem;
-            background-color: var(--surface-container-high);
-            border: 1px solid rgba(66,72,85,0.1);
-        }
-        .quote-icon {
-            font-size: 2.5rem;
-            color: rgba(172,138,255,0.4);
-            display: block;
-            margin-bottom: 1rem;
-        }
-        .quote-text {
-            font-family: 'Newsreader', serif;
-            font-style: italic;
-            font-size: 1.125rem;
-            color: var(--on-surface-variant);
-            line-height: 1.5;
-        }
-
-        /* ── Mobile bottom nav ── */
-        .mobile-nav {
-            display: none;
-            position: fixed;
-            bottom: 0; left: 0;
-            width: 100%;
-            height: 4rem;
-            background-color: var(--surface-container-low);
-            align-items: center;
-            justify-content: space-around;
-            z-index: 50;
-            padding: 0 1rem;
-        }
-        .mobile-nav a {
-            color: var(--on-surface-variant);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-decoration: none;
-            font-size: 0.625rem;
-        }
-        .mobile-nav a.active { color: var(--primary); }
-
-        @media (max-width: 767px) {
-            .mobile-nav { display: flex; }
-            main { padding-bottom: 4rem; }
-        }
+        .btn-sm-follow.not-following { border: none; background: var(--on-surface); color: #000; }
+        .btn-sm-follow.not-following:hover { opacity: 0.8; }
     </style>
 </head>
-<body>
+<body class="overflow-x-hidden bg-background no-global-search">
 
 <div id="navbar-container"></div>
 
@@ -262,76 +94,55 @@
     <div class="container-xl">
         <div class="row g-5 align-items-start">
 
-            <div class="col-12 col-lg-8">
-                <div class="mb-4">
-                    <h1 class="section-title">Blogs Published</h1>
-                    <div class="title-bar"></div>
+            <div class="col-12 col-lg-8 order-2 order-lg-1">
+                <div class="mb-4 d-flex justify-content-between align-items-center border-bottom border-secondary" style="border-color: rgba(66,72,85,0.4) !important; padding-bottom: 1rem;">
+                    <div>
+                        <h1 class="section-title m-0">Blogs Published</h1>
+                        <div class="title-bar"></div>
+                    </div>
                 </div>
 
-                <div class="empty-state">
-                    <div class="empty-icon-wrap">
-                        <span class="material-symbols-outlined">auto_stories</span>
-                    </div>
-                    <h3>No blogs published yet</h3>
-                    <p>Your creative journey is just beginning. Start your first story today and let the world read your ink.</p>
-                    <button class="btn-create">
-                        <span class="material-symbols-outlined">add</span>
-                        Create New Post
-                    </button>
+                <div id="blog-list-container">
                 </div>
             </div>
 
-            <div class="col-12 col-lg-4">
+            <div class="col-12 col-lg-4 order-1 order-lg-2">
                 <div class="position-sticky" style="top: 8rem;">
-
                     <div class="d-flex flex-column align-items-center mb-4">
                         <div class="avatar-ring">
-                            <img alt="Profile Avatar"
-                                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAG5fBrHMukHYyAM6COTttasL9RdcUrPMTUci-JwujjNHsyWdgStmqb93mIzbT6SXj7pccfmmjFklNXwScavGp0Ggq1t_1gAepcwjXCbd9d5mPaXYSyHYSYxepv7yxwS-RGiLHbRZI46wzn-kuYbJYFQI5WEyS24kminRe3YAzOtqM1EDw8YXF1bigUw5DrjpHbKG6zsHtutE_Ujv-kTYbWYb_oDrqSm6vo_GA3dPLxMlZRQbof3Ug7uEwJOYhynA4bsj951Rsrw"/>
+                            <img id="profile-avatar" alt="Avatar" src="https://placehold.co/400x400/151a22/a5abba?text=..."/>
                         </div>
 
-                        <div class="text-center mb-4">
-                            <div class="profile-name">Parics</div>
-                            <div class="profile-handle">@caixxoongg</div>
+                        <div class="text-center mb-3">
+                            <div class="profile-name" id="profile-name">Đang tải...</div>
+                            <div class="profile-handle" id="profile-handle">@...</div>
                         </div>
 
-                        <div class="stats-row">
-                            <div class="stat-item">
-                                <span class="stat-value">0</span>
-                                <span class="stat-label">Blogs</span>
+                        <p class="bio-text" id="profile-bio"></p>
+
+                        <div id="profile-actions" class="w-100 mb-4">
+                        </div>
+
+                        <div class="stats-row w-100 border-top border-bottom" style="border-color: rgba(66,72,85,0.15) !important;">
+                            <div class="stat-item" onclick="openFollowModal('followers')">
+                                <span class="stat-value" id="stat-followers">0</span>
+                                <span class="stat-label">Followers</span>
                             </div>
-                            <span class="stat-divider">•</span>
-                            <div class="stat-item">
-                                <span class="stat-value">0</span>
+                            <div class="stat-item" onclick="openFollowModal('following')">
+                                <span class="stat-value" id="stat-following">0</span>
+                                <span class="stat-label">Following</span>
+                            </div>
+                            <div class="stat-item" style="cursor: default;">
+                                <span class="stat-value" id="stat-reads">0</span>
                                 <span class="stat-label">Reads</span>
                             </div>
                         </div>
 
-                        <div class="w-100">
-                            <div class="mb-3">
-                                <div class="bio-label mb-2">Bio</div>
-                                <p class="bio-text">This is a test profile.</p>
-                            </div>
-
-                            <button class="btn-edit-profile mb-3">
-                                <span class="material-symbols-outlined" style="font-size:1rem;">edit</span>
-                                Edit Profile
-                            </button>
-
-                            <div class="joined-row">
-                                <span class="material-symbols-outlined">calendar_today</span>
-                                Joined on 29 Sep 2023
-                            </div>
+                        <div class="joined-row w-100">
+                            <span class="material-symbols-outlined">calendar_today</span>
+                            <span id="profile-joined">Joined on ...</span>
                         </div>
                     </div>
-
-                    <div class="quote-card">
-                        <span class="material-symbols-outlined quote-icon">format_quote</span>
-                        <p class="quote-text">
-                            "The ink flows where the spirit wanders. Your first words are waiting to be whispered onto the digital vellum."
-                        </p>
-                    </div>
-
                 </div>
             </div>
 
@@ -339,22 +150,23 @@
     </div>
 </main>
 
-<div id="footer-container"></div>
+<div class="modal fade" id="followModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="followModalTitle">Followers</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="follow-search-input" class="search-user-input" placeholder="Search users...">
 
-<nav class="mobile-nav">
-    <a href="#">
-        <span class="material-symbols-outlined">article</span>
-        Blog
-    </a>
-    <a href="#">
-        <span class="material-symbols-outlined">edit_note</span>
-        Write
-    </a>
-    <a href="#" class="active">
-        <span class="material-symbols-outlined">person</span>
-        Profile
-    </a>
-</nav>
+                <div id="follow-list-container" style="max-height: 60vh; overflow-y: auto;">
+                    <div class="text-center py-4 text-muted">Đang tải...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -364,24 +176,378 @@
 <script src="../assets/js/nav.js"></script>
 
 <script>
+    let targetUsername = null;
+    let currentUserFollowList = []; // Lưu trữ danh sách tải về để Live Search
+
     $(document).ready(function() {
-        // Tải Footer nếu có
-        $('#footer-container').load('../fragments/footer.html');
-
-        // Tải Navbar và CHỜ tải xong mới chạy logic Auth
         $('#navbar-container').load('../fragments/navbar.html', function(response, status, xhr) {
-            if (status == "error") {
-                console.error("Lỗi tải Navbar: " + xhr.status + " " + xhr.statusText);
-                return;
-            }
-
-            // Cập nhật giao diện Đăng nhập/Khách
             if (typeof updateNavAuth === 'function') {
                 updateNavAuth();
             }
+            initProfile();
+        });
+
+        // Bắt sự kiện gõ phím tìm kiếm trong Modal
+        $('#follow-search-input').on('input', function() {
+            const keyword = $(this).val().toLowerCase().trim();
+            renderFollowList(keyword);
         });
     });
-</script>
 
+    function skeletons(n) {
+        var h = '';
+        for (var i = 0; i < n; i++) {
+            h += '<div class="d-flex gap-4 py-4 border-bottom" style="border-color: rgba(66,72,85,0.4) !important; border-bottom-width: 1px !important;">' +
+                '<div class="flex-grow-1">' +
+                '<span class="sk mb-2" style="width:150px;height:16px;display:block;"></span>' +
+                '<span class="sk mb-2" style="width:78%;height:28px;display:block;"></span>' +
+                '<span class="sk mb-2" style="width:100%;height:16px;display:block;"></span>' +
+                '<span class="sk" style="width:68%;height:16px;display:block;"></span>' +
+                '</div>' +
+                '<div class="flex-shrink-0 d-none d-sm-block">' +
+                '<span class="sk" style="width:150px;height:130px;display:block;border-radius:8px;"></span>' +
+                '</div>' +
+                '</div>';
+        }
+        return h;
+    }
+
+    function initProfile() {
+        const urlParams = new URLSearchParams(window.location.search);
+        targetUsername = urlParams.get('user');
+
+        $('#blog-list-container').html(skeletons(3));
+
+        if (targetUsername) {
+            loadUserInfo(targetUsername);
+            loadUserBlogs(targetUsername);
+        } else {
+            // Nếu không có param ?user=... trên URL, tự động lấy Profile của chính mình
+            callApi('/users/my-profile', 'GET')
+                .done(function(res) {
+                    targetUsername = res.result.username;
+                    window.history.replaceState({}, '', `user-profile.html?user=${targetUsername}`);
+                    loadUserInfo(targetUsername);
+                    loadUserBlogs(targetUsername);
+                })
+                .fail(function() {
+                    $('#blog-list-container').html(`
+                        <div class="empty-state">
+                            <h3>Phiên đăng nhập đã hết hạn!</h3>
+                            <p>Vui lòng đăng nhập lại để xem hồ sơ của bạn.</p>
+                            <a href="login.html" class="btn-create text-decoration-none mt-3" style="color:var(--primary);">Đăng nhập</a>
+                        </div>
+                    `);
+                });
+        }
+    }
+
+    // ==========================================
+    // 1. TẢI THÔNG TIN NGƯỜI DÙNG & NÚT ACTION
+    // ==========================================
+    function loadUserInfo(username) {
+        callApi('/users/profile/' + username, 'GET').done(function(res) {
+            const user = res.result;
+
+            $('#profile-name').text(user.fullName || user.username);
+            $('#profile-handle').text('@' + user.username);
+            $('#profile-bio').text(user.bio || 'This user prefers to keep an air of mystery about them.');
+
+            // Cập nhật 2 chỉ số Follow
+            $('#stat-followers').text(user.totalFollowers || 0);
+            $('#stat-following').text(user.totalFollowing || 0);
+
+            if (user.avatarUrl) {
+                $('#profile-avatar').attr('src', user.avatarUrl);
+            } else {
+                $('#profile-avatar').attr('src', `https://ui-avatars.com/api/?name=${user.username}&background=151a22&color=ac8aff`);
+            }
+
+            if (user.createdAt) {
+                $('#profile-joined').text('Joined on ' + fmtDate(user.createdAt));
+            }
+
+            // RENDER NÚT HÀNH ĐỘNG
+            const actionContainer = $('#profile-actions');
+            const currentUser = localStorage.getItem('username');
+
+            if (currentUser && currentUser === user.username) {
+                // Nếu đang xem chính mình -> Nút Edit
+                actionContainer.html(`
+                    <a href="edit-profile.html" class="btn-action btn-edit">
+                        <span class="material-symbols-outlined" style="font-size: 1.1rem;">edit</span> Edit Profile
+                    </a>
+                `);
+            } else {
+                // Nếu đang xem người khác -> Render nút Follow/Unfollow dựa vào trạng thái
+                renderFollowButtonMain(user.username, user.followedByCurrentUser);
+            }
+
+        }).fail(function() {
+            $('#profile-name').text('User Not Found');
+            $('#profile-handle').text('');
+            $('#profile-bio').text('');
+        });
+    }
+
+    // Render nút Follow chính ở trang Profile
+    function renderFollowButtonMain(username, isFollowed) {
+        const actionContainer = $('#profile-actions');
+        if (isFollowed) {
+            actionContainer.html(`
+                <button class="btn-action btn-unfollow" onclick="toggleFollowMain('${username}', true)">
+                    <span class="follow-text d-flex align-items-center gap-2">
+                        <span class="material-symbols-outlined" style="font-size: 1.1rem;">how_to_reg</span> Following
+                    </span>
+                </button>
+            `);
+        } else {
+            actionContainer.html(`
+                <button class="btn-action btn-follow" onclick="toggleFollowMain('${username}', false)">
+                    <span class="material-symbols-outlined" style="font-size: 1.1rem;">person_add</span> Follow
+                </button>
+            `);
+        }
+    }
+
+    // Xử lý khi bấm nút Follow ở trang chính
+    function toggleFollowMain(username, isCurrentlyFollowed) {
+        if (!S.isAuth) { alert("Vui lòng đăng nhập để theo dõi!"); return; }
+
+        // Đổi UI ngay lập tức cho mượt
+        renderFollowButtonMain(username, !isCurrentlyFollowed);
+
+        // Tăng giảm số lượng tạm thời
+        let currentFollowers = parseInt($('#stat-followers').text());
+        $('#stat-followers').text(isCurrentlyFollowed ? currentFollowers - 1 : currentFollowers + 1);
+
+        callApi(`/users/${username}/follow`, 'POST').fail(function() {
+            toast("Lỗi! Không thể cập nhật trạng thái theo dõi.");
+            // Rollback UI nếu lỗi
+            renderFollowButtonMain(username, isCurrentlyFollowed);
+            $('#stat-followers').text(currentFollowers);
+        });
+    }
+
+    // ==========================================
+    // 2. TẢI DANH SÁCH BÀI VIẾT CỦA TÁC GIẢ
+    // ==========================================
+    function loadUserBlogs(username) {
+        callApi('/blogs/user/' + username, 'GET').done(function(res) {
+            const blogs = res.result || [];
+            const $list = $('#blog-list-container');
+
+            let totalReads = 0;
+            blogs.forEach(b => totalReads += (b.totalReads || 0));
+            $('#stat-reads').text(totalReads);
+
+            const currentUser = localStorage.getItem('username');
+
+            if (blogs.length === 0) {
+                $list.html(`
+                    <div class="empty-state">
+                        <span class="material-symbols-outlined" style="font-size: 3rem; margin-bottom: 1rem;">auto_stories</span>
+                        <h3>No blogs published yet</h3>
+                        <p class="mx-auto mt-2">This space is waiting for stories to be told.</p>
+                        ${(currentUser && currentUser === username) ? '<a href="blog-editor.html" class="btn-action btn-follow text-decoration-none mt-4 mx-auto" style="width: auto; padding: 0.6rem 1.5rem; color: #000;">Write a story</a>' : ''}
+                    </div>
+                `);
+                return;
+            }
+
+            $list.empty();
+            blogs.forEach(p => {
+                const dateStr = fmtDate(p.createdAt);
+                var catName = p.category ? p.category.name : 'Chưa phân loại';
+                var authorName = p.author ? p.author.username : username;
+                const bannerUrl = p.banner ? p.banner : 'https://placehold.co/600x400/151a22/a5abba?text=No+Image';
+
+                let plainTextContent = extractTextFromContent(p.content, 99999);
+                let readTime = Math.ceil((plainTextContent.split(/\s+/).length || 1) / 200);
+                if (readTime === 0) readTime = 1;
+                var postExcerpt = p.description ? p.description : extractTextFromContent(p.content, 180);
+
+                var $card = $('<article class="d-flex flex-column flex-sm-row gap-3 gap-sm-4 py-4 border-bottom" style="border-color: rgba(66,72,85,0.4) !important; border-bottom-width: 1px !important; cursor: pointer; transition: background 0.2s;">')
+                    .hover(
+                        function() { $(this).css('background-color', 'rgba(255,255,255,0.03)'); },
+                        function() { $(this).css('background-color', 'transparent'); }
+                    )
+                    .on('click', function(){
+                        window.location.href = 'post.html?id=' + p.slug;
+                    });
+
+                var cardHtml = `
+                    <div class="flex-grow-1 order-2 order-sm-1">
+                        <div class="d-flex align-items-center gap-2 mb-2" style="font-size: 0.85rem; color: #a5abba;">
+                            <span class="text-white fw-bold">${authorName}</span>
+                            <span>@${authorName}</span>
+                            <span>•</span>
+                            <span>${dateStr}</span>
+                        </div>
+
+                        <h2 class="mb-2" style="font-family: 'Newsreader', serif; font-size: 1.5rem; font-weight: 700; color: #e0e5f5; line-height: 1.3;">
+                            ${p.title}
+                        </h2>
+
+                        <p class="mb-3" style="color: #a5abba; font-size: 0.95rem; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                            ${postExcerpt}
+                        </p>
+
+                        <div class="d-flex align-items-center gap-3" style="font-size: 0.8rem; color: #a5abba;">
+                            <span style="background: rgba(224, 229, 245, 0.15); padding: 0.3rem 0.8rem; border-radius: 9999px; color: #ffffff; font-weight: 500;">
+                                ${catName}
+                            </span>
+                            <span>${readTime} min read</span>
+
+                            <div class="ms-auto d-flex align-items-center">
+                                <span class="like-btn d-flex align-items-center gap-1" style="cursor: pointer; padding: 0.2rem 0.5rem; border-radius: 4px; transition: color 0.2s;" title="Like">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                    </svg>
+                                    <span class="like-count">${p.totalLikes || 0}</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex-shrink-0 order-1 order-sm-2 mb-3 mb-sm-0">
+                        <img src="${bannerUrl}" alt="${p.title}" style="width: 100%; max-width: 150px; height: 130px; object-fit: cover; border-radius: 8px; background: #1b202a; display: block;">
+                    </div>
+                `;
+
+                $card.html(cardHtml);
+                $list.append($card);
+            });
+        }).fail(function() {
+            $('#blog-list-container').html('<div class="text-danger mt-4">Không thể tải danh sách bài viết.</div>');
+        });
+    }
+
+    // ==========================================
+    // 3. LOGIC MODAL & DANH SÁCH FOLLOW
+    // ==========================================
+    function openFollowModal(type) {
+        if (!targetUsername) return;
+
+        const title = type === 'followers' ? 'Followers' : 'Following';
+        $('#followModalTitle').text(title);
+        $('#follow-search-input').val(''); // Xóa text tìm kiếm cũ
+        $('#follow-list-container').html('<div class="text-center py-4 text-muted">Đang tải...</div>');
+
+        // Mở modal Bootstrap
+        const myModal = new bootstrap.Modal(document.getElementById('followModal'));
+        myModal.show();
+
+        // Gọi API tương ứng
+        callApi(`/users/${targetUsername}/${type}`, 'GET').done(function(res) {
+            currentUserFollowList = res.result || []; // Lưu vào bộ nhớ tạm để search
+            renderFollowList('');
+        }).fail(function() {
+            $('#follow-list-container').html('<div class="text-center py-4 text-danger">Lỗi kết nối máy chủ!</div>');
+        });
+    }
+
+    // Render danh sách trong Modal (có hỗ trợ lọc theo keyword)
+    function renderFollowList(keyword) {
+        const $container = $('#follow-list-container');
+        $container.empty();
+
+        // Lọc danh sách nếu có gõ phím tìm kiếm
+        const filteredList = currentUserFollowList.filter(u =>
+            u.username.toLowerCase().includes(keyword) ||
+            (u.fullName && u.fullName.toLowerCase().includes(keyword))
+        );
+
+        if (filteredList.length === 0) {
+            $container.html('<div class="text-center py-4 text-muted">Không tìm thấy người dùng nào.</div>');
+            return;
+        }
+
+        const currentUser = localStorage.getItem('username');
+
+        filteredList.forEach(u => {
+            const avatarUrl = u.avatarUrl || `https://ui-avatars.com/api/?name=${u.username}&background=151a22&color=ac8aff`;
+            const nameToDisplay = u.fullName || u.username;
+
+            // Xây dựng giao diện cho 1 người dùng
+            let html = `
+                <div class="user-list-item">
+                    <div class="d-flex align-items-center gap-3 cursor-pointer" onclick="window.location.href='user-profile.html?user=${u.username}'">
+                        <img src="${avatarUrl}" alt="Avatar" class="user-list-avatar">
+                        <div>
+                            <div class="fw-bold" style="font-size: 0.95rem; color: var(--on-surface);">${nameToDisplay}</div>
+                            <div class="text-muted" style="font-size: 0.8rem;">@${u.username}</div>
+                        </div>
+                    </div>
+            `;
+
+            // Chỉ hiện nút theo dõi nếu người đó KHÔNG PHẢI LÀ CHÍNH MÌNH
+            if (currentUser !== u.username) {
+                if (u.followedByCurrentUser) {
+                    html += `<button class="btn-sm-follow is-following" onclick="toggleFollowInModal(this, '${u.username}')"><span>Following</span></button>`;
+                } else {
+                    html += `<button class="btn-sm-follow not-following" onclick="toggleFollowInModal(this, '${u.username}')">Follow</button>`;
+                }
+            }
+
+            html += `</div>`;
+            $container.append(html);
+        });
+    }
+
+    // Xử lý khi bấm nút Follow BÊN TRONG MODAL
+    function toggleFollowInModal(btnElement, targetUser) {
+        if (!S.isAuth) { alert("Vui lòng đăng nhập để theo dõi!"); return; }
+
+        const $btn = $(btnElement);
+        const isFollowing = $btn.hasClass('is-following');
+
+        // Đổi trạng thái UI ngay lập tức
+        if (isFollowing) {
+            $btn.removeClass('is-following').addClass('not-following').html('Follow');
+        } else {
+            $btn.removeClass('not-following').addClass('is-following').html('<span>Following</span>');
+        }
+
+        // Cập nhật ngầm trong mảng tạm (để khi search không bị mất trạng thái)
+        const userObj = currentUserFollowList.find(u => u.username === targetUser);
+        if(userObj) userObj.followedByCurrentUser = !isFollowing;
+
+        // Nếu người trong modal chính là chủ profile đang xem -> Cập nhật luôn UI bên ngoài
+        if (targetUser === targetUsername) {
+            renderFollowButtonMain(targetUser, !isFollowing);
+        }
+
+        callApi(`/users/${targetUser}/follow`, 'POST').fail(function() {
+            toast("Lỗi! Không thể cập nhật.");
+        });
+    }
+
+    // ==========================================
+    // CÁC HÀM HELPER (Đã viết gọn)
+    // ==========================================
+    function fmtDate(iso) {
+        if (!iso) return '';
+        var d = new Date(iso);
+        var m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return d.getDate() + ' ' + m[d.getMonth()] + ' ' + d.getFullYear();
+    }
+
+    function extractTextFromContent(content, len) {
+        if(!content) return '';
+        let plainText = "";
+        try {
+            const parsed = JSON.parse(content);
+            if (parsed && parsed.blocks) {
+                parsed.blocks.forEach(b => { if (b.data && b.data.text) plainText += b.data.text + " "; });
+            } else { plainText = content; }
+        } catch (e) { plainText = content; }
+
+        var div = document.createElement("div"); div.innerHTML = plainText;
+        var text = div.textContent || div.innerText || ""; text = text.trim();
+        if (len && text.length > len) return text.substring(0, len) + '...';
+        return text;
+    }
+</script>
 </body>
 </html>

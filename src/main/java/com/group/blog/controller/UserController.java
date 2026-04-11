@@ -24,18 +24,18 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @FieldDefaults(level= AccessLevel.PRIVATE,makeFinal=true)
 public class UserController {
-   UserService userService;
-   @PostMapping()
+    UserService userService;
+
+    @PostMapping()
     ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreatetionRequest request){
-       ApiResponse<UserResponse> apiResponse = new ApiResponse<>();
-       apiResponse.setResult(userService.createUser(request));
-       return apiResponse;
-   }
+        ApiResponse<UserResponse> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(userService.createUser(request));
+        return apiResponse;
+    }
 
     @GetMapping
     ApiResponse<List<UserResponse>> getUsers() {
         var authentication= SecurityContextHolder.getContext().getAuthentication();
-        // log thông tin về username và role của user này ra
         log.info("Username: {}",authentication.getName());
         authentication.getAuthorities().forEach(grantedAuthority-> log.info(grantedAuthority.getAuthority()));
         return ApiResponse.<List<UserResponse>>builder()
@@ -43,6 +43,30 @@ public class UserController {
                 .build();
     }
 
+    // 🔥 ĐÃ ĐƯỢC CHUYỂN LÊN ĐÂY: API cụ thể phải đặt lên trên!
+    @GetMapping("/my-profile")
+    public ApiResponse<UserResponse> getMyProfile() {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.getMyProfile())
+                .build();
+    }
+
+    @PutMapping("/my-profile")
+    public ApiResponse<UserResponse> updateMyProfile(@RequestBody @Valid UserUpdateRequest request) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.updateMyProfile(request))
+                .build();
+    }
+
+    @PutMapping("/my-profile/change-password")
+    public ApiResponse<String> changePassword(@RequestBody @Valid PasswordChangeRequest request) {
+        userService.changePassword(request);
+        return ApiResponse.<String>builder()
+                .result("Password has been changed successfully")
+                .build();
+    }
+
+    // ⚠️ API chứa biến (PathVariable) phải đặt ở dưới cùng!
     @GetMapping("/{userId}")
     ApiResponse<UserResponse> getUser(@PathVariable("userId") UUID userId) {
         ApiResponse<UserResponse> apiResponse = new ApiResponse<>();
@@ -57,16 +81,6 @@ public class UserController {
         return apiResponse;
     }
 
-    @PutMapping("/my-profile/change-password")
-    public ApiResponse<String> changePassword(@RequestBody @Valid PasswordChangeRequest request) {
-        // Gọi Service xử lý logic
-        userService.changePassword(request);
-        // Trả về thông báo thành công
-        return ApiResponse.<String>builder()
-                .result("Password has been changed successfully")
-                .build();
-    }
-
     @DeleteMapping("/{userId}")
     ApiResponse<String> deleteUser(@PathVariable("userId") UUID userId) {
         userService.deleteUser(userId);
@@ -75,4 +89,11 @@ public class UserController {
         return apiResponse;
     }
 
+    // Lấy thông tin public của một user
+    @GetMapping("/profile/{username}")
+    public ApiResponse<UserResponse> getUserByUsername(@PathVariable String username) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.getUserByUsername(username))
+                .build();
+    }
 }

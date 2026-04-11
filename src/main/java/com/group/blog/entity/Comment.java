@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 @Entity
 @Getter
@@ -34,6 +35,11 @@ public class Comment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     Comment parent;
+
+    // 🔥 THÊM ĐOẠN NÀY ĐỂ LẤY DANH SÁCH REPLY DỄ DÀNG HƠN
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("createdAt ASC")
+    List<Comment> replies;
 
     @Column(columnDefinition = "TEXT")
     String content;

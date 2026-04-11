@@ -101,7 +101,7 @@ function renderSbTrending() {
                     '</div>'
                 ).on('click', function(){
                     // Mở khóa chuyển trang chi tiết với URL chuẩn 3NF
-                    window.location.href = '/post.html?id=' + p.slug;
+                    window.location.href = 'post.html?id=' + p.slug;
                 })
             );
         });

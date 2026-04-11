@@ -23,6 +23,9 @@ public class BlogResponse {
     String description;
     String content;
 
+    String draftContent;
+    String draftBanner;
+
     boolean draft;
     // Đổi sang long cho đồng bộ với kết quả trả về từ JPA count()
     long totalLikes;
@@ -38,4 +41,9 @@ public class BlogResponse {
 
     CategoryResponse category;
     Set<TagResponse> tags;
+
+    // 🔥 THÊM TRƯỜNG NÀY: Để frontend biết user hiện tại đã like bài này chưa
+    boolean isLikedByCurrentUser;
+
+    boolean isBookmarkedByCurrentUser;
 }

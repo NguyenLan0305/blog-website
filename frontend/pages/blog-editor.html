@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 
-    <!-- Tailwind config -->
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -41,12 +40,9 @@
     </script>
 
     <style>
-        /* === Khi dùng thực tế, bỏ khối <style> này và dùng: ===
-           <link rel="stylesheet" href="main.css">
-           ======================================================= */
-
         body { background-color: #0D1117; color: #E6EDF3; font-family: 'Inter', sans-serif; }
         [contenteditable]:focus { outline: none; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
         /* ── View switching ── */
         #view-editor  { display: flex; }
@@ -116,23 +112,14 @@
 
         /* ── Mobile: floating block toolbar ── */
         #mob-block-toolbar {
-            display: none;
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            z-index: 8888;
-            background: #1C2128;
-            border-top: 1px solid #2D333B;
-            padding: 8px 16px 20px;
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-around;
-            gap: 4px;
+            display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 8888;
+            background: #1C2128; border-top: 1px solid #2D333B; padding: 8px 16px 20px;
+            flex-direction: row; align-items: center; justify-content: space-around; gap: 4px;
         }
         #mob-block-toolbar.visible { display: flex; }
         .mob-tb-btn {
             display: flex; flex-direction: column; align-items: center; gap: 2px;
-            background: transparent; border: none; cursor: pointer;
-            color: #8B949E; padding: 6px 10px; border-radius: 8px;
+            background: transparent; border: none; cursor: pointer; color: #8B949E; padding: 6px 10px; border-radius: 8px;
             transition: background 0.15s, color 0.15s; flex: 1; min-width: 0;
         }
         .mob-tb-btn:active { background: #2D333B; color: #E6EDF3; }
@@ -151,37 +138,18 @@
 
         /* ── FIX MOBILE: header nút không bị mất ── */
         @media (max-width: 640px) {
-            /* editor left padding for gutter */
             #editor-area { padding-left: 3rem !important; }
             .block-gutter { left: -44px; }
-
-            /* Header: thu gọn padding, cho nút đủ chỗ */
             #view-editor header { padding: 0.55rem 0.75rem; }
-
-            /* CHỈ ẩn header-title (tên bài), KHÔNG ẩn nút Save Draft / Publish */
             #view-editor header #header-title { display: none; }
-
-            /* Thu nhỏ nút cho vừa màn hình */
             #view-editor header .flex.items-center.gap-3 { gap: 0.4rem; }
-            #view-editor header button {
-                padding: 0.35rem 0.85rem !important;
-                font-size: 0.78rem !important;
-            }
-
-            /* main content padding */
+            #view-editor header button { padding: 0.35rem 0.85rem !important; font-size: 0.78rem !important; }
             #view-editor .max-w-3xl { padding-left: 1rem; padding-right: 1rem; }
-
-            /* banner height compact */
             #banner-filled { height: 200px !important; }
         }
 
         /* ── Preview responsive ── */
-        .pv-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
-            align-items: start;
-        }
+        .pv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; }
         @media (max-width: 900px) {
             .pv-grid { grid-template-columns: 1fr; gap: 2rem; }
             .pv-sticky { position: static !important; }
@@ -210,22 +178,32 @@
         .pv-suggestion-btn:hover { border-color:rgba(172,138,255,0.4); color:#ac8aff; background:rgba(172,138,255,0.06); }
     </style>
 </head>
-<body class="flex flex-col min-h-screen">
+<body class="flex flex-col min-h-screen overflow-x-hidden bg-background no-global-search" >
 
-<!-- ═══════════════════════════════════════════════════════
-     VIEW 1: EDITOR
-═══════════════════════════════════════════════════════ -->
 <div id="view-editor" class="flex-col min-h-screen w-full">
 
-    <header class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-4 bg-[#0D1117]/80 backdrop-blur-md border-b border-[#2D333B]/40">
-        <div class="flex items-center gap-4 min-w-0">
-            <span class="material-symbols-outlined text-2xl text-white flex-shrink-0">eco</span>
-            <!-- FIX: id="header-title" để CSS mobile target đúng, không ẩn nút -->
-            <span class="text-sm font-medium text-[#8B949E] truncate" id="header-title">test blog 1</span>
+    <header class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 sm:px-8 py-4 bg-[#0D1117]/80 backdrop-blur-md border-b border-[#2D333B]/40">
+
+        <div class="flex items-center gap-2 sm:gap-3 cursor-pointer hover:opacity-80 transition-opacity min-w-0" onclick="handleEditorNavigation()" title="Quay về Trang chủ">
+            <svg width="26" height="26" viewBox="0 0 22 22" fill="none" class="flex-shrink-0">
+                <rect width="22" height="22" rx="6" fill="url(#lg)"/>
+                <path d="M6 16V9l5-3 5 3v7" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M9 16v-4h4v4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <defs>
+                    <linearGradient id="lg" x1="0" y1="0" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#7c6ff7"/>
+                        <stop offset="1" stop-color="#9f7aea"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+            <span class="font-['Newsreader'] text-xl font-bold text-[#e0e5f5] hidden sm:block">Inkwell</span>
+
+            <span class="text-sm font-medium text-[#8B949E] truncate ml-2 pl-2 sm:ml-3 sm:pl-3 border-l border-[#2D333B]" id="header-title">test blog 1</span>
         </div>
-        <div class="flex items-center gap-3 flex-shrink-0">
-            <button class="bg-[#2D333B] text-[#E6EDF3] px-5 py-2 rounded-full text-sm font-medium hover:bg-[#30363D] transition-all whitespace-nowrap">Save Draft</button>
-            <button id="btn-publish" class="bg-white text-[#0D1117] px-6 py-2 rounded-full text-sm font-bold hover:opacity-90 transition-all whitespace-nowrap" onclick="showPreview()">Publish</button>
+
+        <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <button class="bg-[#2D333B] text-[#E6EDF3] px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-medium hover:bg-[#30363D] transition-all whitespace-nowrap" onclick="saveAsDraftAndLeave()">Save Draft</button>
+            <button id="btn-publish" class="bg-white text-[#0D1117] px-4 sm:px-6 py-2 rounded-full text-xs sm:text-sm font-bold hover:opacity-90 transition-all whitespace-nowrap" onclick="showPreview()">Publish</button>
         </div>
     </header>
 
@@ -233,7 +211,6 @@
         <main class="flex-1 overflow-y-auto no-scrollbar">
             <div class="max-w-3xl mx-auto px-6 space-y-10">
 
-                <!-- Banner -->
                 <section class="relative group" id="banner-section">
                     <input type="file" id="banner-input" class="hidden" accept="image/*"/>
                     <div id="banner-empty"
@@ -254,7 +231,6 @@
                     </div>
                 </section>
 
-                <!-- Title -->
                 <section class="space-y-3">
           <textarea id="title-input" rows="1"
                     class="w-full bg-transparent border-none focus:ring-0 text-5xl md:text-6xl font-['Newsreader'] font-bold text-[#E6EDF3] placeholder:text-[#484F58] resize-none px-0 leading-tight"
@@ -262,20 +238,13 @@
                     <div class="h-px bg-[#2D333B]/60 w-full"></div>
                 </section>
 
-                <!-- Editor blocks -->
                 <article class="relative pl-14" id="editor-area"></article>
 
             </div>
         </main>
     </div>
 
-</div><!-- end #view-editor -->
-
-
-<!-- ═══════════════════════════════════════════════════════
-     VIEW 2: PREVIEW / PUBLISH
-═══════════════════════════════════════════════════════ -->
-<div id="view-preview">
+</div><div id="view-preview">
 
     <header class="w-full sticky top-0 z-50" style="background:#0b0e14;">
         <nav class="flex justify-between items-center px-8 py-6 w-full max-w-screen-2xl mx-auto">
@@ -294,7 +263,6 @@
     <main style="max-width:1280px; margin:0 auto; padding:1rem 2rem 5rem; box-sizing:border-box;">
         <div class="pv-grid">
 
-            <!-- Left: story card preview -->
             <section class="pv-sticky" style="position:sticky; top:7rem;">
                 <div style="font-size:0.6875rem; text-transform:uppercase; letter-spacing:0.05rem; color:#ac8aff; margin-bottom:1.5rem;">
                     Story Preview
@@ -313,6 +281,7 @@
                     </div>
 
                     <div style="padding:2rem; display:flex; flex-direction:column; gap:1rem;">
+                        <div id="pv-selected-cat" style="font-size:0.75rem; font-weight:700; color:#ac8aff; text-transform:uppercase; letter-spacing:0.05em; display:none;"></div>
                         <h3 id="pv-title" style="font-family:'Newsreader',serif; font-size:1.875rem; color:#e0e5f5; line-height:1.25;">test blog 1</h3>
                         <p id="pv-desc" style="color:#a5abba; font-size:0.875rem; line-height:1.6; max-width:28rem;">
                             Your content is looking great. Review the details on the right to finalize your publication settings.
@@ -321,7 +290,6 @@
                 </div>
             </section>
 
-            <!-- Right: finalize form -->
             <section class="pv-editorial-shadow" style="background:#10131b; border-radius:0.75rem; padding:2.5rem;">
                 <div style="margin-bottom:2.5rem;">
                     <h3 style="font-family:'Newsreader',serif; font-size:1.5rem; color:#e0e5f5; margin-bottom:0.5rem;">Finalize Details</h3>
@@ -329,7 +297,22 @@
                 </div>
 
                 <div style="display:flex; flex-direction:column; gap:2rem;">
-
+                    <div>
+                        <label style="display:flex; justify-content:space-between; align-items:center; font-size:0.6875rem; text-transform:uppercase; letter-spacing:0.05rem; color:#a5abba; margin-bottom:0.5rem; padding:0 4px;">
+                            <span>Category <span style="color:#fd6f85;">*</span></span>
+                            <span id="pv-cat-error" style="color:#fd6f85; display:none; font-weight:600;">Required</span>
+                        </label>
+                        <div style="position:relative;">
+                            <select id="pv-form-category" required
+                                    style="width:100%; background:#151a22; border:1px solid rgba(66,72,85,0.15); border-radius:0.5rem; padding:0.75rem 1rem; color:#e0e5f5; font-family:'Inter',sans-serif; font-size:0.9rem; outline:none; transition:all 0.2s; box-sizing:border-box; appearance:none; cursor:pointer;"
+                                    onfocus="this.style.borderColor='rgba(172,138,255,0.3)'; this.style.boxShadow='0 0 0 2px rgba(172,138,255,0.08)';"
+                                    onblur="this.style.borderColor='rgba(66,72,85,0.15)'; this.style.boxShadow='none';"
+                                    onchange="pvUpdateCategory(this)">
+                                <option value="" disabled selected>Đang tải danh mục...</option>
+                            </select>
+                            <span class="material-symbols-outlined" style="position:absolute; right:1rem; top:50%; transform:translateY(-50%); color:#a5abba; pointer-events:none;">expand_more</span>
+                        </div>
+                    </div>
                     <div>
                         <label style="display:block; font-size:0.6875rem; text-transform:uppercase; letter-spacing:0.05rem; color:#a5abba; margin-bottom:0.5rem; padding:0 4px;">Blog Title</label>
                         <input id="pv-form-title" type="text" value="test blog 1"
@@ -360,26 +343,20 @@
                         <div style="display:flex; justify-content:flex-end; margin-top:6px;">
                             <span id="pv-tags-counter" style="font-size:0.625rem; text-transform:uppercase; letter-spacing:0.05rem; color:#a5abba; opacity:0.7;">10 tags left</span>
                         </div>
-                        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;">
+                        <div id="pv-tag-suggestions" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;">
                             <span style="font-size:0.625rem; text-transform:uppercase; letter-spacing:0.05rem; color:#a5abba; opacity:0.5; width:100%; margin-bottom:2px;">Suggestions</span>
-                            <button class="pv-suggestion-btn" onclick="pvAddTag('Technology')">Technology</button>
-                            <button class="pv-suggestion-btn" onclick="pvAddTag('Programming')">Programming</button>
-                            <button class="pv-suggestion-btn" onclick="pvAddTag('Design')">Design</button>
-                            <button class="pv-suggestion-btn" onclick="pvAddTag('Life')">Life</button>
-                            <button class="pv-suggestion-btn" onclick="pvAddTag('Travel')">Travel</button>
-                            <button class="pv-suggestion-btn" onclick="pvAddTag('Cooking')">Cooking</button>
+                            <span style="font-size: 0.8rem; color: #707583;">Đang tải thẻ...</span>
                         </div>
                     </div>
 
                     <div style="padding-top:1.5rem;">
-                        <button style="width:100%; background:linear-gradient(to right, #ac8aff, #8f60fa); color:#280067; padding:1rem; border-radius:9999px; font-weight:600; font-size:1.125rem; border:none; cursor:pointer; transition:all 0.3s; box-shadow:0 8px 24px rgba(172,138,255,0.15);"
+                        <button id="pv-btn-publish"
+                                style="width:100%; background:linear-gradient(to right, #ac8aff, #8f60fa); color:#280067; padding:1rem; border-radius:9999px; font-weight:600; font-size:1.125rem; border:none; cursor:pointer; transition:all 0.3s; box-shadow:0 8px 24px rgba(172,138,255,0.15);"
                                 onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='none'"
-                                onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1.02)'">
+                                onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1.02)'"
+                                onclick="validateAndPublish()">
                             Publish
                         </button>
-                        <p style="text-align:center; font-size:0.6875rem; color:#a5abba; margin-top:1rem; text-transform:uppercase; letter-spacing:0.1rem;">
-                            Visibility: Public
-                        </p>
                     </div>
 
                 </div>
@@ -391,11 +368,7 @@
     <div style="position:fixed; top:-10%; right:-10%; width:40%; height:40%; background:rgba(172,138,255,0.05); border-radius:9999px; filter:blur(120px); z-index:-1; pointer-events:none;"></div>
     <div style="position:fixed; bottom:-5%; left:-5%; width:30%; height:30%; background:rgba(137,206,255,0.05); border-radius:9999px; filter:blur(100px); z-index:-1; pointer-events:none;"></div>
 
-</div><!-- end #view-preview -->
-
-
-<!-- Mobile block toolbar -->
-<div id="mob-block-toolbar">
+</div><div id="mob-block-toolbar">
     <button class="mob-tb-btn" onclick="mobCmd('bullet')">
         <span class="material-symbols-outlined">list</span>
         <span>Bullet</span>
@@ -436,7 +409,6 @@
     </button>
 </div>
 
-<!-- Slash menu -->
 <div id="slash-menu">
     <div class="menu-section">Text</div>
     <div class="menu-item" data-cmd="text"><div class="menu-icon"><span class="material-symbols-outlined">text_fields</span></div><div class="menu-item-text"><strong>Text</strong><span>Plain paragraph</span></div></div>
@@ -456,7 +428,61 @@
 
 <input type="file" id="block-img-input" class="hidden" accept="image/*"/>
 
+<div id="custom-modal-overlay" class="fixed inset-0 bg-[#0D1117]/80 backdrop-blur-sm z-[9999] hidden items-center justify-center opacity-0 transition-opacity duration-200">
+    <div class="bg-[#1C2128] border border-[#2D333B] rounded-xl shadow-2xl p-6 max-w-sm w-full mx-4 transform scale-95 transition-transform duration-200" id="custom-modal-box">
+        <h3 id="modal-title" class="text-xl font-['Newsreader'] font-bold text-[#E6EDF3] mb-2"></h3>
+        <p id="modal-message" class="text-sm text-[#8B949E] mb-6 leading-relaxed"></p>
+        <div class="flex justify-end gap-3">
+            <button id="modal-btn-secondary" class="hidden"></button>
+            <button id="modal-btn-primary"></button>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="../assets/js/app.js"></script>
 <script>
+    // ═══════════════════════════════════════════
+    //  CUSTOM MODAL LOGIC
+    // ═══════════════════════════════════════════
+    function showModal(title, message, primaryBtn, secondaryBtn, onPrimary, onSecondary) {
+        $('#modal-title').text(title);
+        $('#modal-message').html(message.replace(/\n/g, '<br>'));
+
+        const $primary = $('#modal-btn-primary');
+        const $secondary = $('#modal-btn-secondary');
+
+        $primary.text(primaryBtn.text).removeClass().addClass(primaryBtn.class)
+            .off('click').on('click', () => { hideModal(); if (onPrimary) onPrimary(); });
+
+        if (secondaryBtn) {
+            $secondary.text(secondaryBtn.text).removeClass().addClass(secondaryBtn.class).show()
+                .off('click').on('click', () => { hideModal(); if (onSecondary) onSecondary(); });
+        } else {
+            $secondary.hide();
+        }
+
+        const $overlay = $('#custom-modal-overlay');
+        const $box = $('#custom-modal-box');
+        $overlay.removeClass('hidden').addClass('flex');
+
+        // Trigger CSS transition
+        setTimeout(() => {
+            $overlay.removeClass('opacity-0').addClass('opacity-100');
+            $box.removeClass('scale-95').addClass('scale-100');
+        }, 10);
+    }
+
+    function hideModal() {
+        const $overlay = $('#custom-modal-overlay');
+        const $box = $('#custom-modal-box');
+        $overlay.removeClass('opacity-100').addClass('opacity-0');
+        $box.removeClass('scale-100').addClass('scale-95');
+        setTimeout(() => {
+            $overlay.removeClass('flex').addClass('hidden');
+        }, 200);
+    }
+
     // ═══════════════════════════════════════════
     //  SPA VIEW SWITCHER
     // ═══════════════════════════════════════════
@@ -919,6 +945,298 @@
     document.getElementById('banner-filled').addEventListener('click', () => {
         if (isTouch()) document.getElementById('banner-input').click();
     });
+
+    // ═══════════════════════════════════════════
+    //  PREVIEW: Category Validation
+    // ═══════════════════════════════════════════
+    function pvUpdateCategory(sel) {
+        const catDisplay = document.getElementById('pv-selected-cat');
+        const errorMsg = document.getElementById('pv-cat-error');
+
+        if (sel.value) {
+            catDisplay.textContent = sel.options[sel.selectedIndex].text;
+            catDisplay.style.display = 'block';
+            errorMsg.style.display = 'none';
+            sel.style.borderColor = 'rgba(172,138,255,0.3)';
+        } else {
+            catDisplay.style.display = 'none';
+        }
+    }
+
+    function validateAndPublish() {
+        const sel = document.getElementById('pv-form-category');
+        const errorMsg = document.getElementById('pv-cat-error');
+
+        if (!sel.value) {
+            errorMsg.style.display = 'inline';
+            sel.style.borderColor = '#fd6f85';
+            sel.focus();
+            sel.style.transform = 'translateX(-5px)';
+            setTimeout(() => sel.style.transform = 'translateX(5px)', 50);
+            setTimeout(() => sel.style.transform = 'translateX(0)', 100);
+            return;
+        }
+
+        const title = document.getElementById('pv-form-title').value.trim();
+        const description = document.getElementById('pv-form-desc').value.trim();
+        const categoryId = sel.value;
+        const tags = pvTags;
+
+        let bannerData = null;
+        const bannerImg = document.getElementById('banner-img');
+        if (bannerImg.src && bannerImg.src.startsWith('data:image')) {
+            bannerData = bannerImg.src;
+        }
+
+        const contentJsonString = JSON.stringify({
+            blocks: blocks.map(b => ({
+                type: b.type === 'text' ? 'paragraph' : b.type,
+                data: { text: b.content, url: b.content, caption: b.caption }
+            }))
+        });
+
+        const requestBody = {
+            title: title,
+            banner: bannerData,
+            description: description,
+            content: contentJsonString,
+            draft: false,
+            categoryId: categoryId,
+            tags: tags
+        };
+
+        const publishBtn = document.getElementById('pv-btn-publish');
+        const originalBtnHtml = publishBtn.innerHTML;
+        publishBtn.innerHTML = '<span class="material-symbols-outlined" style="animation: spin 1s linear infinite; font-size: 1.2rem;">sync</span> Publishing...';
+        publishBtn.disabled = true;
+        publishBtn.style.opacity = '0.7';
+
+        const apiMethod = editingBlogId ? 'PUT' : 'POST';
+        const apiEndpoint = editingBlogId ? '/blogs/' + editingBlogId : '/blogs';
+
+        callApi(apiEndpoint, apiMethod, requestBody)
+            .done(function(res) {
+                const newSlug = res.result.slug;
+                window.location.href = 'post.html?id=' + newSlug;
+            })
+            .fail(function(xhr) {
+                publishBtn.innerHTML = originalBtnHtml;
+                publishBtn.disabled = false;
+                publishBtn.style.opacity = '1';
+
+                let errorMessage = 'Không thể đăng bài viết lúc này.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                }
+
+                // Sử dụng Modal thay vì alert
+                showModal(
+                    "Lỗi Xuất Bản",
+                    errorMessage,
+                    { text: "Đóng", class: "px-4 py-2 bg-[#2D333B] text-[#E6EDF3] rounded-lg hover:bg-[#30363D] transition-colors text-sm font-medium" },
+                    null, null, null
+                );
+            });
+    }
+
+    // ═══════════════════════════════════════════
+    //  CALL API: ĐỔ DỮ LIỆU DANH MỤC VÀ TAG TỪ DB
+    // ═══════════════════════════════════════════
+    document.addEventListener('DOMContentLoaded', function() {
+        callApi('/categories', 'GET').done(function(res) {
+            const categories = res.result || res;
+            const sel = document.getElementById('pv-form-category');
+
+            sel.innerHTML = '<option value="" disabled selected>Select a category...</option>';
+
+            categories.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.name;
+                sel.appendChild(opt);
+            });
+            if (typeof prefillCategoryId !== 'undefined' && prefillCategoryId) {
+                sel.value = prefillCategoryId;
+                pvUpdateCategory(sel);
+            }
+        });
+
+        callApi('/tags', 'GET').done(function(res) {
+            const tags = res.result || res;
+            const container = document.getElementById('pv-tag-suggestions');
+
+            container.innerHTML = '<span style="font-size:0.625rem; text-transform:uppercase; letter-spacing:0.05rem; color:#a5abba; opacity:0.5; width:100%; margin-bottom:2px;">Suggestions</span>';
+
+            tags.sort((a, b) => (b.postCount || 0) - (a.postCount || 0));
+            const topTags = tags.slice(0, 6);
+
+            topTags.forEach(t => {
+                const btn = document.createElement('button');
+                btn.className = 'pv-suggestion-btn';
+                btn.textContent = t.name;
+                btn.onclick = () => pvAddTag(t.name);
+                container.appendChild(btn);
+            });
+        });
+    });
+
+    // ==========================================
+    // LOGIC EDIT: NẠP DỮ LIỆU BẢN NHÁP / BÀI VIẾT CŨ
+    // ==========================================
+    const urlParams = new URLSearchParams(window.location.search);
+    const editSlug = urlParams.get('id');
+    let editingBlogId = null;
+    let prefillCategoryId = null;
+    let isPublishedBlog = false;
+
+    if (editSlug) {
+        editingBlogId = extractIdFromSlug(editSlug);
+        loadBlogDataForEdit(editingBlogId);
+    }
+
+    function loadBlogDataForEdit(id) {
+        callApi('/blogs/' + id, 'GET').done(function(res) {
+            const post = res.result || res;
+
+            if (post.draft === false) {
+                isPublishedBlog = true;
+            }
+
+            const titleInput = document.getElementById('title-input');
+            titleInput.value = post.title;
+            document.getElementById('header-title').textContent = post.title;
+            document.getElementById('pv-form-title').value = post.title;
+            document.getElementById('pv-title').textContent = post.title;
+            titleInput.style.height = 'auto';
+            titleInput.style.height = titleInput.scrollHeight + 'px';
+
+            const activeBanner = post.draftBanner ? post.draftBanner : post.banner;
+            if (activeBanner) {
+                document.getElementById('banner-img').src = activeBanner;
+                document.getElementById('pv-banner-img').src = activeBanner;
+                document.getElementById('banner-empty').classList.add('hidden');
+                document.getElementById('banner-filled').classList.remove('hidden');
+                document.getElementById('pv-banner-img').style.display = 'block';
+                document.getElementById('pv-banner-empty').style.display = 'none';
+            }
+
+            const activeContent = post.draftContent ? post.draftContent : post.content;
+            if (activeContent) {
+                try {
+                    const parsed = JSON.parse(activeContent);
+                    if (parsed && parsed.blocks && parsed.blocks.length > 0) {
+                        blocks = parsed.blocks.map(b => ({
+                            id: nextId++,
+                            type: b.type === 'paragraph' ? 'text' : b.type,
+                            content: b.data.text || b.data.url || '',
+                            caption: b.data.caption || ''
+                        }));
+                        renderAll();
+                    }
+                } catch(e) { console.error("Lỗi parse nội dung", e); }
+            }
+
+            if (post.description) {
+                const descInput = document.getElementById('pv-form-desc');
+                descInput.value = post.description;
+                pvUpdateDesc(descInput);
+            }
+
+            if (post.tags && post.tags.length > 0) {
+                post.tags.forEach(t => pvAddTag(t.name));
+            }
+
+            if (post.category) {
+                prefillCategoryId = post.category.id;
+                const sel = document.getElementById('pv-form-category');
+                if (sel.options.length > 1) {
+                    sel.value = prefillCategoryId;
+                    pvUpdateCategory(sel);
+                }
+            }
+        });
+    }
+
+    // ==========================================
+    // LOGIC CẢNH BÁO KHI CHUYỂN TRANG
+    // ==========================================
+    function handleEditorNavigation() {
+        const title = document.getElementById('title-input').value.trim();
+        const firstBlockText = (typeof blocks !== 'undefined' && blocks[0] && blocks[0].content) ? blocks[0].content.trim() : '';
+        const hasUnsavedChanges = editingBlogId || title !== 'test blog 1' || firstBlockText !== '' || blocks.length > 1;
+
+        if (hasUnsavedChanges) {
+            if (isPublishedBlog) {
+                // Thay vì confirm() -> Hiện Custom Modal
+                showModal(
+                    "Hủy thay đổi?",
+                    "Bạn đang chỉnh sửa một bài viết ĐÃ XUẤT BẢN.\nBạn có chắc chắn muốn hủy bỏ các thay đổi này và rời đi không?",
+                    { text: "Rời đi", class: "px-4 py-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 font-medium text-sm transition-colors" },
+                    { text: "Ở lại", class: "px-4 py-2 bg-transparent text-[#8B949E] hover:text-[#E6EDF3] font-medium text-sm transition-colors" },
+                    () => { window.location.href = 'home-page.html'; }, // Click Rời đi
+                    null // Click Ở lại (Đóng modal, không làm gì)
+                );
+            } else {
+                // Thay vì confirm() -> Hiện Custom Modal
+                showModal(
+                    "Lưu bản nháp?",
+                    "Bạn có những thay đổi chưa lưu.\nBạn có muốn lưu bài viết này thành Bản Nháp trước khi rời đi không?",
+                    { text: "Lưu & Rời đi", class: "px-4 py-2 bg-[#ac8aff] text-[#0D1117] rounded-lg hover:opacity-90 font-medium text-sm transition-opacity" },
+                    { text: "Bỏ qua & Rời đi", class: "px-4 py-2 bg-transparent text-[#8B949E] hover:text-[#E6EDF3] font-medium text-sm transition-colors" },
+                    () => { saveAsDraftAndLeave(); }, // Click Lưu
+                    () => { window.location.href = 'home-page.html'; } // Click Bỏ qua
+                );
+            }
+        } else {
+            window.location.href = 'home-page.html';
+        }
+    }
+
+    function saveAsDraftAndLeave() {
+        const title = document.getElementById('title-input').value.trim();
+        const categoryId = document.getElementById('pv-form-category') ? document.getElementById('pv-form-category').value : null;
+
+        let bannerData = null;
+        const bannerImg = document.getElementById('banner-img');
+        if (bannerImg && bannerImg.src && bannerImg.src.startsWith('data:image')) {
+            bannerData = bannerImg.src;
+        }
+
+        const contentJsonString = JSON.stringify({
+            blocks: blocks.map(b => ({
+                type: b.type === 'text' ? 'paragraph' : b.type,
+                data: { text: b.content, url: b.content, caption: b.caption }
+            }))
+        });
+
+        const requestBody = {
+            title: title || 'Bản nháp không tên',
+            banner: bannerData,
+            description: document.getElementById('pv-form-desc') ? document.getElementById('pv-form-desc').value.trim() : '',
+            content: contentJsonString,
+            draft: true,
+            categoryId: categoryId || null,
+            tags: typeof pvTags !== 'undefined' ? pvTags : []
+        };
+
+        const apiMethod = editingBlogId ? 'PUT' : 'POST';
+        const apiEndpoint = editingBlogId ? '/blogs/' + editingBlogId : '/blogs';
+
+        callApi(apiEndpoint, apiMethod, requestBody)
+            .done(function() {
+                window.location.href = 'Manage-Blogs.html';
+            })
+            .fail(function(xhr) {
+                // Thay vì alert() -> Hiện Custom Modal
+                showModal(
+                    "Lỗi Lưu Nháp",
+                    "Không thể lưu bản nháp lúc này. Vui lòng thử lại sau.",
+                    { text: "Đóng", class: "px-4 py-2 bg-[#2D333B] text-[#E6EDF3] rounded-lg hover:bg-[#30363D] transition-colors text-sm font-medium" },
+                    null, null, null
+                );
+            });
+    }
+
 </script>
 </body>
 </html>

@@ -103,4 +103,20 @@ public class BlogController {
                 .result(blogService.filterBlogs(keyword, categoryId))
                 .build();
     }
+
+    // 6. Lấy danh sách bài viết của TÔI (người đang đăng nhập)
+    @GetMapping("/my-blogs")
+    public ApiResponse<List<BlogResponse>> getMyBlogs() {
+        return ApiResponse.<List<BlogResponse>>builder()
+                .result(blogService.getMyBlogs())
+                .build();
+    }
+
+    // 7. Lấy bài viết công khai của một tác giả
+    @GetMapping("/user/{username}")
+    public ApiResponse<List<BlogResponse>> getBlogsByUsername(@PathVariable String username) {
+        return ApiResponse.<List<BlogResponse>>builder()
+                .result(blogService.getPublishedBlogsByUsername(username))
+                .build();
+    }
 }

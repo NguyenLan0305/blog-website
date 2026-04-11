@@ -45,6 +45,20 @@ a { text-decoration: none; }
 /* =========================================
    NAVBAR & AUTH HEADER (BẢN NÂNG CẤP)
 ========================================= */
+
+
+/* Khi thẻ body có class no-global-search, ẩn toàn bộ các khối search-wrapper đi */
+body.no-global-search .search-wrapper {
+    visibility: hidden !important;
+}
+
+/* Riêng trên Mobile, dùng display:none để menu rút gọn lại cho đẹp, không bị trống chỗ */
+@media (max-width: 991px) {
+    body.no-global-search .search-wrapper {
+        display: none !important;
+    }
+}
+
 #navbar {
     background: rgba(7,8,15,.9);
     backdrop-filter: blur(22px);

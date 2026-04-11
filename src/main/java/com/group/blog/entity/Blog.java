@@ -25,13 +25,27 @@ public class Blog {
     @Column(nullable = false)
     String title;
 
+    // Dùng MEDIUMTEXT hoặc LONGTEXT để chứa vừa chuỗi Base64 của ảnh bìa
+    @Column(columnDefinition = "LONGTEXT")
     String banner;
+
+    // Dùng TEXT cho phần mô tả (phòng trường hợp người dùng gõ mô tả dài hơn 255 ký tự)
+    @Column(columnDefinition = "TEXT")
     String description;
 
     @Column(columnDefinition = "LONGTEXT")
     String content;
 
     boolean draft;
+
+    // 🔥 THÊM: Cột chứa nội dung đang sửa dở (nháp)
+    @Column(columnDefinition = "LONGTEXT")
+    String draftContent;
+
+    // 🔥 THÊM: Cột chứa ảnh bìa đang sửa dở
+    @Column(columnDefinition = "LONGTEXT")
+    String draftBanner;
+
     LocalDateTime publishedAt;
     LocalDateTime updatedAt;
     LocalDateTime createdAt;
