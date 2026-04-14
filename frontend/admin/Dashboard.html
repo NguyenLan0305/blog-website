@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>BlogAdmin Dashboard — Inkwell</title>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;700&display=swap" rel="stylesheet"/>
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "admin-bg": "#F5F5F3",
+                        "admin-side": "#2D3432",
+                        "admin-primary": "#ac8aff",
+                        "bd-p": "#7c6ff7"
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F5F5F3; margin: 0; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400; vertical-align: middle; }
+        ::-webkit-scrollbar { display: none; }
+        html { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Sidebar Admin */
+        aside {
+            position: fixed; left: 0; top: 0; height: 100vh; width: 220px;
+            background-color: #2D3432; z-index: 1000;
+        }
+
+        /* Navbar Admin */
+        header {
+            position: fixed; top: 0; right: 0; left: 220px; height: 64px;
+            background: white; border-bottom: 1px solid rgba(0,0,0,0.05);
+            z-index: 999; display: flex; align-items: center; padding: 0 32px;
+            justify-content: space-between;
+        }
+
+        main { margin-left: 220px; padding-top: 64px; }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 12px; padding: 14px 20px;
+            color: #ADB3B0; text-decoration: none; font-size: 12px;
+            font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
+            transition: all 0.2s;
+        }
+        .nav-item:hover, .nav-item.active {
+            color: white; background: rgba(172, 138, 255, 0.08);
+            border-right: 4px solid #ac8aff;
+        }
+
+        .admin-btn-signin {
+            border: 1px solid #7c6ff7;
+            color: #7c6ff7;
+            font-weight: 600;
+            padding: 0.5rem 1.5rem;
+            border-radius: 9999px;
+            font-size: 13px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .admin-btn-signin:hover {
+            background: #7c6ff7;
+            color: white;
+            box-shadow: 0 4px 12px rgba(124, 111, 247, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+<aside>
+    <div class="p-8 mb-4">
+        <h1 class="text-white font-bold text-xl tracking-widest uppercase">BLOG <span class="text-[#ac8aff]">ADMIN</span></h1>
+    </div>
+
+    <nav class="flex flex-col">
+        <a href="Dashboard.html" class="nav-item"><span class="material-symbols-outlined">dashboard</span><span>DASHBOARD</span></a>
+        <a href="Users.html" class="nav-item"><span class="material-symbols-outlined">group</span><span>USERS</span></a>
+        <a href="POSTS.html" class="nav-item"><span class="material-symbols-outlined">description</span><span>POSTS</span></a>
+        <a href="CATEGORIES%20&%20TAGS.html" class="nav-item"><span class="material-symbols-outlined">group</span><span>CATEGORIES & TAGS</span></a>
+    </nav>
+
+    <div class="absolute bottom-0 w-full p-6 border-t border-white/5 bg-[#1a1f1e]">
+        <p class="text-[10px] text-[#ADB3B0] uppercase tracking-widest font-bold">Inkwell System v1.0</p>
+    </div>
+</aside>
+
+<header>
+    <div>
+        <h2 class="text-lg font-bold text-[#2D3432] tracking-tight uppercase">Dashboard</h2>
+    </div>
+
+    <div class="flex items-center gap-6">
+        <button class="relative text-slate-400 hover:text-[#ac8aff] transition-colors">
+            <span class="material-symbols-outlined">notifications</span>
+            <span class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+        </button>
+
+        <div class="h-6 w-[1px] bg-slate-200"></div>
+
+        <a href="admin-login.html" class="admin-btn-signin">Sign In</a>
+    </div>
+</header>
+
+<main class="p-8">
+    <div class="mb-10">
+        <h3 class="text-xl font-medium text-slate-400">System Overview</h3>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+        <div class="bg-white p-7 shadow-sm border border-slate-100 rounded-sm">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Active Users</p>
+            <h4 class="text-3xl font-black mt-2 text-slate-800">1,234</h4>
+            <div class="mt-4 text-[10px] text-green-500 font-bold uppercase">↑ 12% Growth</div>
+        </div>
+        <div class="bg-white p-7 shadow-sm border border-slate-100 rounded-sm">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Live Posts</p>
+            <h4 class="text-3xl font-black mt-2 text-slate-800">567</h4>
+            <div class="mt-4 text-[10px] text-slate-400 font-bold uppercase">Stable Feed</div>
+        </div>
+        <div class="bg-white p-7 shadow-sm border border-slate-100 rounded-sm">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Server Status</p>
+            <h4 class="text-xl font-bold mt-2 text-green-500 flex items-center gap-2">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                OPERATIONAL
+            </h4>
+        </div>
+    </div>
+
+    <div class="bg-white shadow-sm border border-slate-100 overflow-hidden rounded-sm">
+        <div class="p-6 bg-slate-50/50 border-b border-slate-100 flex justify-between items-center">
+            <h4 class="text-xs font-black uppercase tracking-widest text-slate-600">Pending Actions</h4>
+            <button class="text-[11px] font-bold text-[#ac8aff] hover:underline uppercase tracking-tighter">Refresh Sync</button>
+        </div>
+        <table class="w-full text-left text-sm">
+            <thead>
+            <tr class="text-[10px] text-slate-400 uppercase border-b border-slate-50 font-bold">
+                <th class="p-6">User Entity</th>
+                <th class="p-6">Action / Event</th>
+                <th class="p-6 text-right">Status</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50 text-slate-600">
+            <tr class="hover:bg-slate-50 transition-colors">
+                <td class="p-6 font-medium text-slate-800">nguyen_nguyen</td>
+                <td class="p-6 italic">Requesting post publication: "Java RMI Advanced"</td>
+                <td class="p-6 text-right"><span class="px-3 py-1 bg-yellow-50 text-yellow-600 text-[9px] font-black rounded-full border border-yellow-100">REVIEW</span></td>
+            </tr>
+            <tr class="hover:bg-slate-50 transition-colors">
+                <td class="p-6 font-medium text-slate-800">admin_vinh</td>
+                <td class="p-6 italic">Modified system categories: "Tech"</td>
+                <td class="p-6 text-right"><span class="px-3 py-1 bg-green-50 text-green-600 text-[9px] font-black rounded-full border border-green-100">LOGGED</span></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+</body>
+</html>

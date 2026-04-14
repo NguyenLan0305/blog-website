@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>BlogAdmin | User Management</title>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;700&display=swap" rel="stylesheet"/>
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "admin-bg": "#F5F5F3",
+                        "admin-side": "#2D3432",
+                        "admin-primary": "#ac8aff"
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F5F5F3; margin: 0; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400; vertical-align: middle; }
+        ::-webkit-scrollbar { display: none; }
+        html { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Sidebar & Navbar Layout */
+        aside { position: fixed; left: 0; top: 0; height: 100vh; width: 220px; background-color: #2D3432; z-index: 1100; }
+        header { position: fixed; top: 0; right: 0; left: 220px; height: 64px; background: white; border-bottom: 1px solid rgba(0,0,0,0.05); z-index: 1000; display: flex; align-items: center; padding: 0 32px; justify-content: space-between; }
+        main { margin-left: 220px; padding-top: 84px !important; min-height: 100vh; }
+
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 14px 20px; color: #ADB3B0; text-decoration: none; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; transition: all 0.2s; }
+        .nav-item:hover, .nav-item.active { color: white; background: rgba(172, 138, 255, 0.08); border-right: 4px solid #ac8aff; }
+        .admin-btn-signin { border: 1px solid #7c6ff7; color: #7c6ff7; font-weight: 600; padding: 0.5rem 1.5rem; border-radius: 9999px; font-size: 13px; transition: all 0.2s; text-decoration: none; }
+        .admin-btn-signin:hover { background: #7c6ff7; color: white; }
+
+        /* Modal Overlay */
+        #addUserModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        #addUserModal.active { display: flex; }
+    </style>
+</head>
+<body>
+
+<aside>
+    <div class="p-8 mb-4">
+        <h1 class="text-white font-bold text-xl tracking-widest uppercase">BLOG <span class="text-[#ac8aff]">ADMIN</span></h1>
+    </div>
+    <nav class="flex flex-col">
+        <a href="Dashboard.html" class="nav-item"><span class="material-symbols-outlined">dashboard</span><span>DASHBOARD</span></a>
+        <a href="Users.html" class="nav-item"><span class="material-symbols-outlined">group</span><span>USERS</span></a>
+        <a href="POSTS.html" class="nav-item"><span class="material-symbols-outlined">description</span><span>POSTS</span></a>
+        <a href="CATEGORIES%20&%20TAGS.html" class="nav-item"><span class="material-symbols-outlined">group</span><span>CATEGORIES & TAGS</span></a>
+    </nav>
+</aside>
+
+<header>
+    <h2 class="text-lg font-bold text-[#2D3432] uppercase">User Management</h2>
+    <div class="flex items-center gap-6">
+        <button class="relative text-slate-400 hover:text-[#ac8aff]"><span class="material-symbols-outlined">notifications</span></button>
+        <div class="h-6 w-[1px] bg-slate-200"></div>
+        <a href="admin-login.html" class="admin-btn-signin">Sign In</a>
+    </div>
+</header>
+
+<main class="p-8">
+    <div class="flex justify-between items-center mb-8 bg-white/50 p-4 rounded-lg border border-slate-100 shadow-sm">
+        <div class="relative w-full max-w-md">
+            <span class="absolute inset-y-0 left-3 flex items-center text-slate-400"><span class="material-symbols-outlined text-[20px]">search</span></span>
+            <input class="w-full bg-white border border-slate-200 rounded-lg pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ac8aff]/20 transition-all" placeholder="Search users by name or email..." type="text"/>
+        </div>
+        <button onclick="toggleModal(true)" class="bg-[#2D3432] text-white px-6 py-3 rounded-lg font-bold text-sm flex items-center gap-2 hover:bg-black transition-colors shadow-lg">
+            <span class="material-symbols-outlined text-[20px]">person_add</span>
+            CREATE NEW USER
+        </button>
+    </div>
+
+    <div class="bg-white shadow-sm border border-slate-100 overflow-hidden rounded-sm">
+        <table class="w-full text-left text-sm">
+            <thead>
+            <tr class="text-[10px] text-slate-400 uppercase border-b border-slate-50 font-bold bg-slate-50/50">
+                <th class="p-6">User Identity</th>
+                <th class="p-6">Email Address</th>
+                <th class="p-6">Role</th>
+                <th class="p-6 text-right">Actions</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50 text-slate-600">
+            <tr class="hover:bg-slate-50 transition-colors">
+                <td class="p-6 flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-400 text-xs">AW</div>
+                    <span class="font-medium text-slate-800">Alexander Wright</span>
+                </td>
+                <td class="p-6 font-mono text-xs text-slate-400">alex.wright@blogadmin.com</td>
+                <td class="p-6"><span class="px-2 py-0.5 bg-purple-50 text-[#ac8aff] text-[10px] font-bold rounded uppercase">Admin</span></td>
+                <td class="p-6 text-right text-slate-300">
+                    <button class="hover:text-[#ac8aff] mr-3"><span class="material-symbols-outlined text-lg">edit</span></button>
+                    <button class="hover:text-red-400"><span class="material-symbols-outlined text-lg">block</span></button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<div id="addUserModal" onclick="if(event.target == this) toggleModal(false)">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden transform transition-all scale-95 opacity-0 duration-200" id="modalContent">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <h3 class="font-bold text-lg text-[#2D3432] uppercase tracking-tight">Add New User</h3>
+            <button onclick="toggleModal(false)" class="text-slate-400 hover:text-slate-600 transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <form class="p-8 space-y-6" onsubmit="event.preventDefault(); alert('User Added!'); toggleModal(false);">
+            <div class="space-y-2">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Full Name</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-3 flex items-center text-slate-300">
+                        <span class="material-symbols-outlined text-[18px]">person</span>
+                    </span>
+                    <input type="text" required class="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-[#ac8aff]/20 focus:border-[#ac8aff] outline-none transition-all" placeholder="Nguyễn Ngô Hoàng Tú">
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email Address</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-3 flex items-center text-slate-300">
+                        <span class="material-symbols-outlined text-[18px]">mail</span>
+                    </span>
+                    <input type="email" required class="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-[#ac8aff]/20 focus:border-[#ac8aff] outline-none transition-all" placeholder="user@example.com">
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Assign Role</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-3 flex items-center text-slate-300">
+                        <span class="material-symbols-outlined text-[18px]">shield_person</span>
+                    </span>
+                    <select class="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-[#ac8aff]/20 focus:border-[#ac8aff] outline-none bg-white appearance-none cursor-pointer">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="pt-4 flex gap-3">
+                <button type="button" onclick="toggleModal(false)" class="flex-1 py-3 text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest">Cancel</button>
+                <button type="submit" class="flex-1 py-3 bg-[#ac8aff] text-white rounded-xl text-sm font-bold hover:brightness-105 shadow-lg shadow-[#ac8aff]/20 transition-all uppercase tracking-widest">
+                    Save User
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function toggleModal(show) {
+        const modal = document.getElementById('addUserModal');
+        const content = document.getElementById('modalContent');
+
+        if (show) {
+            modal.classList.add('active');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        } else {
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.remove('active');
+            }, 200);
+        }
+    }
+</script>
+
+</body>
+</html>
