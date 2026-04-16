@@ -76,22 +76,7 @@
 </head>
 <body>
 
-<aside>
-    <div class="p-8 mb-4">
-        <h1 class="text-white font-bold text-xl tracking-widest uppercase">BLEB <span class="text-[#ac8aff]">ADMIN</span></h1>
-    </div>
-
-    <nav class="flex flex-col">
-        <a href="dashboard.html" class="nav-item"><span class="material-symbols-outlined">dashboard</span><span>DASHBOARD</span></a>
-        <a href="users.html" class="nav-item"><span class="material-symbols-outlined">group</span><span>USERS</span></a>
-        <a href="posts.html" class="nav-item"><span class="material-symbols-outlined">description</span><span>POSTS</span></a>
-        <a href="categories-tags.html" class="nav-item"><span class="material-symbols-outlined">group</span><span>CATEGORIES & TAGS</span></a>
-    </nav>
-
-    <div class="absolute bottom-0 w-full p-6 border-t border-white/5 bg-[#1a1f1e]">
-        <p class="text-[10px] text-[#ADB3B0] uppercase tracking-widest font-bold">Bleb Admin</p>
-    </div>
-</aside>
+<div id="sidebar-placeholder"></div>
 
 <header>
     <div>
@@ -103,10 +88,6 @@
             <span class="material-symbols-outlined">notifications</span>
             <span class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
         </button>
-
-        <div class="h-6 w-[1px] bg-slate-200"></div>
-
-        <a href="admin-login.html" class="admin-btn-signin">Sign In</a>
     </div>
 </header>
 
@@ -114,55 +95,18 @@
     <div class="mb-10">
         <h3 class="text-xl font-medium text-slate-400">System Overview</h3>
     </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-        <div class="bg-white p-7 shadow-sm border border-slate-100 rounded-sm">
-            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Active Users</p>
-            <h4 class="text-3xl font-black mt-2 text-slate-800">1,234</h4>
-            <div class="mt-4 text-[10px] text-green-500 font-bold uppercase">↑ 12% Growth</div>
-        </div>
-        <div class="bg-white p-7 shadow-sm border border-slate-100 rounded-sm">
-            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Live Posts</p>
-            <h4 class="text-3xl font-black mt-2 text-slate-800">567</h4>
-            <div class="mt-4 text-[10px] text-slate-400 font-bold uppercase">Stable Feed</div>
-        </div>
-        <div class="bg-white p-7 shadow-sm border border-slate-100 rounded-sm">
-            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Server Status</p>
-            <h4 class="text-xl font-bold mt-2 text-green-500 flex items-center gap-2">
-                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                OPERATIONAL
-            </h4>
-        </div>
-    </div>
-
-    <div class="bg-white shadow-sm border border-slate-100 overflow-hidden rounded-sm">
-        <div class="p-6 bg-slate-50/50 border-b border-slate-100 flex justify-between items-center">
-            <h4 class="text-xs font-black uppercase tracking-widest text-slate-600">Pending Actions</h4>
-            <button class="text-[11px] font-bold text-[#ac8aff] hover:underline uppercase tracking-tighter">Refresh Sync</button>
-        </div>
-        <table class="w-full text-left text-sm">
-            <thead>
-            <tr class="text-[10px] text-slate-400 uppercase border-b border-slate-50 font-bold">
-                <th class="p-6">User Entity</th>
-                <th class="p-6">Action / Event</th>
-                <th class="p-6 text-right">Status</th>
-            </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-50 text-slate-600">
-            <tr class="hover:bg-slate-50 transition-colors">
-                <td class="p-6 font-medium text-slate-800">nguyen_nguyen</td>
-                <td class="p-6 italic">Requesting post publication: "Java RMI Advanced"</td>
-                <td class="p-6 text-right"><span class="px-3 py-1 bg-yellow-50 text-yellow-600 text-[9px] font-black rounded-full border border-yellow-100">REVIEW</span></td>
-            </tr>
-            <tr class="hover:bg-slate-50 transition-colors">
-                <td class="p-6 font-medium text-slate-800">admin_vinh</td>
-                <td class="p-6 italic">Modified system categories: "Tech"</td>
-                <td class="p-6 text-right"><span class="px-3 py-1 bg-green-50 text-green-600 text-[9px] font-black rounded-full border border-green-100">LOGGED</span></td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
 </main>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Hãy kiểm tra đường dẫn file admin_sidebar.html cho đúng (ví dụ: "../fragments/admin_sidebar.html")
+        $("#sidebar-placeholder").load("../fragments/admin_sidebar.html", function() {
+            // Sau khi load xong, tìm đúng link Dashboard để active
+            $("#nav-dashboard").addClass("active");
+        });
+    });
+</script>
 
 </body>
 </html>

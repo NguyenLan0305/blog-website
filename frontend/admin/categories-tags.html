@@ -36,41 +36,33 @@
 
         .nav-item { display: flex; align-items: center; gap: 12px; padding: 14px 20px; color: #ADB3B0; text-decoration: none; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; transition: all 0.2s; }
         .nav-item:hover, .nav-item.active { color: white; background: rgba(172, 138, 255, 0.08); border-right: 4px solid #ac8aff; }
-        .admin-btn-signin { border: 1px solid #7c6ff7; color: #7c6ff7; font-weight: 600; padding: 0.5rem 1.5rem; border-radius: 9999px; font-size: 13px; transition: all 0.2s; text-decoration: none; }
 
-        /* Modal Custom Styles */
         #catModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 2000; align-items: center; justify-content: center; }
         #catModal.active { display: flex; }
+
+        .tag-pill { transition: all 0.2s; border: 1px solid rgba(0,0,0,0.05); }
+        .tag-pill:hover { border-color: #ac8aff; background: white; }
     </style>
 </head>
 <body>
 
-<aside>
-    <div class="p-8 mb-4">
-        <h1 class="text-white font-bold text-xl tracking-widest uppercase">BLEB <span class="text-[#ac8aff]">ADMIN</span></h1>
-    </div>
-    <nav class="flex flex-col">
-        <a href="dashboard.html" class="nav-item"><span class="material-symbols-outlined">dashboard</span><span>DASHBOARD</span></a>
-        <a href="users.html" class="nav-item"><span class="material-symbols-outlined">group</span><span>USERS</span></a>
-        <a href="posts.html" class="nav-item"><span class="material-symbols-outlined">description</span><span>POSTS</span></a>
-        <a href="categories-tags.html" class="nav-item"><span class="material-symbols-outlined">group</span><span>CATEGORIES & TAGS</span></a>
-    </nav>
-</aside>
+<div id="sidebar-placeholder"></div>
 
 <header>
     <h2 class="text-lg font-bold text-[#2D3432] uppercase tracking-tight">Categories & Tags</h2>
     <div class="flex items-center gap-6">
-        <button class="relative text-slate-400 hover:text-[#ac8aff]"><span class="material-symbols-outlined">notifications</span></button>
-        <div class="h-6 w-[1px] bg-slate-200"></div>
-        <a href="admin-login.html" class="admin-btn-signin">Sign In</a>
+        <button class="relative text-slate-400 hover:text-[#ac8aff] transition-colors flex items-center justify-center p-1">
+            <span class="material-symbols-outlined text-[22px]">chat_bubble_outline</span>
+            <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-[#ac8aff]/50 rounded-full border-2 border-white"></span>
+        </button>
     </div>
 </header>
 
-<main class="p-8">
-    <div class="flex justify-between items-end mb-12">
+<main class="p-10">
+    <div class="flex justify-between items-end mb-10">
         <div class="max-w-xl">
             <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-2 font-bold">Taxonomy Control</p>
-            <h3 class="text-3xl font-light tracking-tight text-slate-800">Organize the architecture of your digital archive.</h3>
+            <h3 class="text-3xl font-light tracking-tight text-slate-800 italic">Organize the architecture of your digital archive.</h3>
         </div>
         <button onclick="toggleCatModal(true)" class="bg-[#2D3432] text-white px-8 py-3 rounded-lg font-bold text-xs flex items-center gap-2 hover:bg-black transition-all shadow-lg uppercase tracking-widest">
             <span class="material-symbols-outlined text-[18px]">add</span>
@@ -78,15 +70,19 @@
         </button>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-        <div class="bg-white border border-slate-100 p-8 shadow-sm flex flex-col justify-between min-h-[200px]">
+    <div class="flex items-center justify-between mb-8 border-b border-slate-200 pb-2">
+        <h3 class="font-mono text-xs uppercase tracking-widest text-slate-500 font-bold">Active Categories</h3>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+        <div class="bg-white border border-slate-100 p-8 shadow-sm flex flex-col justify-between min-h-[200px] rounded-sm">
             <div>
                 <div class="flex justify-between mb-4">
                     <span class="font-mono text-[10px] text-slate-400 uppercase">CAT_ID: 001</span>
                     <span class="px-2 py-0.5 bg-slate-100 text-slate-500 text-[9px] font-black rounded uppercase">Primary</span>
                 </div>
                 <h4 class="text-2xl font-medium text-slate-800">Architecture & Design</h4>
-                <p class="text-slate-400 text-sm mt-2">Modernist aesthetics and human-centric spaces.</p>
+                <p class="text-slate-400 text-sm mt-2 leading-relaxed">Modernist aesthetics and human-centric spaces.</p>
             </div>
             <div class="mt-8 flex justify-between items-center border-t border-slate-50 pt-4">
                 <span class="text-2xl font-bold text-[#ac8aff]">124 <small class="text-[10px] text-slate-300 uppercase">Posts</small></span>
@@ -96,14 +92,15 @@
                 </div>
             </div>
         </div>
-        <div class="bg-white border border-slate-100 p-8 shadow-sm flex flex-col justify-between min-h-[200px]">
+
+        <div class="bg-white border border-slate-100 p-8 shadow-sm flex flex-col justify-between min-h-[200px] rounded-sm">
             <div>
                 <div class="flex justify-between mb-4">
                     <span class="font-mono text-[10px] text-slate-400 uppercase">CAT_ID: 002</span>
                     <span class="px-2 py-0.5 bg-purple-50 text-[#ac8aff] text-[9px] font-black rounded uppercase">Editorial</span>
                 </div>
                 <h4 class="text-2xl font-medium text-slate-800">Systems & Logic</h4>
-                <p class="text-slate-400 text-sm mt-2">Algorithmic complexity and engineering.</p>
+                <p class="text-slate-400 text-sm mt-2 leading-relaxed">Algorithmic complexity and engineering.</p>
             </div>
             <div class="mt-8 flex justify-between items-center border-t border-slate-50 pt-4">
                 <span class="text-2xl font-bold text-[#ac8aff]">42 <small class="text-[10px] text-slate-300 uppercase">Posts</small></span>
@@ -114,54 +111,120 @@
             </div>
         </div>
     </div>
+
+    <section class="mb-16">
+        <div class="flex items-center justify-between mb-8 border-b border-slate-200 pb-2">
+            <h3 class="font-mono text-xs uppercase tracking-widest text-slate-500 font-bold">Tag Index</h3>
+            <div class="flex items-center gap-4">
+                <input class="bg-transparent border-none focus:ring-0 text-xs font-mono w-40 placeholder:text-slate-300" placeholder="Search tags..." type="text"/>
+                <button class="text-[10px] uppercase tracking-widest font-bold text-slate-800 underline underline-offset-4">Add New Tag</button>
+            </div>
+        </div>
+
+        <div class="bg-white border border-slate-100 p-10 rounded-sm shadow-sm">
+            <div class="flex flex-wrap gap-3 mb-12">
+                <div class="tag-pill flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-sm">
+                    <span class="text-[11px] uppercase tracking-wider font-bold text-slate-600">Modernism</span>
+                    <span class="text-[10px] font-mono text-slate-300">24</span>
+                    <button class="material-symbols-outlined text-sm text-slate-300 hover:text-red-400">close</button>
+                </div>
+                <div class="tag-pill flex items-center gap-2 px-3 py-2 bg-blue-50/50 border-blue-100 rounded-sm">
+                    <span class="text-[11px] uppercase tracking-wider font-bold text-blue-400">Brutalist</span>
+                    <span class="text-[10px] font-mono text-blue-200">18</span>
+                    <button class="material-symbols-outlined text-sm text-blue-200 hover:text-red-400">close</button>
+                </div>
+                <div class="tag-pill flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-sm">
+                    <span class="text-[11px] uppercase tracking-wider font-bold text-slate-600">Typography</span>
+                    <span class="text-[10px] font-mono text-slate-300">56</span>
+                    <button class="material-symbols-outlined text-sm text-slate-300 hover:text-red-400">close</button>
+                </div>
+                <div class="tag-pill flex items-center gap-2 px-3 py-2 bg-red-50 border-red-100 rounded-sm">
+                    <span class="text-[11px] uppercase tracking-wider font-bold text-red-400">Opinion</span>
+                    <span class="text-[10px] font-mono text-red-200">7</span>
+                    <button class="material-symbols-outlined text-sm text-red-200 hover:text-red-400">close</button>
+                </div>
+            </div>
+
+            <div class="pt-8 border-t border-slate-100">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                    <div class="space-y-2">
+                        <label class="font-mono text-[9px] uppercase tracking-widest text-slate-400 block font-bold">Internal Indexing String</label>
+                        <input class="w-full bg-slate-50 border border-slate-100 px-4 py-3 text-sm font-mono focus:outline-none focus:border-[#ac8aff] transition-colors" placeholder="type_tag_name_here..." type="text"/>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="font-mono text-[9px] uppercase tracking-widest text-slate-400 block font-bold">Semantic Association</label>
+                        <select class="w-full bg-slate-50 border border-slate-100 px-4 py-3 text-sm focus:outline-none focus:border-[#ac8aff] transition-colors appearance-none cursor-pointer">
+                            <option>Neutral Primary</option>
+                            <option>Info Secondary</option>
+                            <option>Alert Critical</option>
+                        </select>
+                    </div>
+                    <button class="bg-[#2D3432] text-white px-10 py-3.5 text-[11px] uppercase tracking-[0.2em] font-bold hover:bg-black transition-all">Register Tag</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="md:col-span-2 bg-white border border-slate-100 p-8 flex items-start gap-8 rounded-sm shadow-sm">
+            <div class="w-1/3 aspect-square bg-slate-100 overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=400" alt="Guide" class="w-full h-full object-cover grayscale opacity-80">
+            </div>
+            <div class="w-2/3">
+                <h4 class="font-mono text-[10px] uppercase tracking-widest text-[#ac8aff] mb-4 font-bold">Optimization Guide</h4>
+                <p class="text-sm text-slate-400 leading-relaxed mb-6 italic">Maintain a lean taxonomy. Duplicate tags reduce SEO efficiency and confuse user navigation paths. We recommend no more than 10 top-level categories for optimal archive structure.</p>
+                <a href="#" class="text-[10px] font-bold uppercase tracking-widest underline underline-offset-8 text-slate-800">Read Documentation</a>
+            </div>
+        </div>
+
+        <div class="bg-[#2D3432] text-white p-8 flex flex-col justify-between rounded-sm shadow-lg">
+            <div>
+                <span class="material-symbols-outlined text-4xl mb-4 font-light text-[#ac8aff]">analytics</span>
+                <h4 class="text-xl font-light tracking-tight mb-2">Archive Health</h4>
+                <p class="text-white/50 text-xs leading-relaxed">94% of your current tags are active in at least one published article.</p>
+            </div>
+            <div class="mt-8 border-t border-white/10 pt-4 flex justify-between items-center font-mono text-[10px]">
+                <span class="tracking-widest">UNUSED TAGS</span>
+                <span class="text-[#ac8aff] font-bold">06</span>
+            </div>
+        </div>
+    </section>
 </main>
 
 <div id="catModal" onclick="if(event.target == this) toggleCatModal(false)">
     <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden transform transition-all scale-95 opacity-0 duration-200" id="modalContent">
         <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
             <div>
-                <h3 class="font-bold text-lg text-[#2D3432] uppeCATEGORIES%20&%20TAGS.htmlrcase tracking-tight">Register New Category</h3>
+                <h3 class="font-bold text-lg text-[#2D3432] uppercase tracking-tight">Register New Category</h3>
                 <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">System Indexing Mode</p>
             </div>
             <button onclick="toggleCatModal(false)" class="text-slate-400 hover:text-slate-600"><span class="material-symbols-outlined">close</span></button>
         </div>
-
         <form class="p-8 space-y-6" onsubmit="event.preventDefault(); toggleCatModal(false);">
             <div class="space-y-2">
                 <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Category Identifier</label>
-                <input type="text" required class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#ac8aff]/20 outline-none transition-all font-medium" placeholder="Technology">
+                <input type="text" required class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none font-medium focus:border-[#ac8aff]" placeholder="Technology">
             </div>
-
-            <div class="space-y-2">
-                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Classification Level</label>
-                <div class="grid grid-cols-2 gap-3">
-                    <label class="cursor-pointer border border-slate-100 p-3 rounded-xl hover:bg-slate-50 transition-all flex items-center gap-3">
-                        <input type="radio" name="classType" checked class="text-[#ac8aff] focus:ring-0">
-                        <span class="text-xs font-bold text-slate-600">PRIMARY</span>
-                    </label>
-                    <label class="cursor-pointer border border-slate-100 p-3 rounded-xl hover:bg-slate-50 transition-all flex items-center gap-3">
-                        <input type="radio" name="classType" class="text-[#ac8aff] focus:ring-0">
-                        <span class="text-xs font-bold text-slate-600">EDITORIAL</span>
-                    </label>
-                </div>
-            </div>
-
             <div class="space-y-2">
                 <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Internal Description</label>
-                <textarea class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#ac8aff]/20 outline-none transition-all h-24 resize-none" placeholder="Briefly define the scope of this category..."></textarea>
+                <textarea class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm h-24 resize-none focus:border-[#ac8aff] outline-none" placeholder="Briefly define the scope..."></textarea>
             </div>
-
             <div class="pt-4 flex gap-3">
                 <button type="button" onclick="toggleCatModal(false)" class="flex-1 py-3 text-[11px] font-black text-slate-400 uppercase tracking-widest">Abort</button>
-                <button type="submit" class="flex-1 py-3 bg-[#2D3432] text-white rounded-xl text-[11px] font-black hover:bg-black shadow-lg transition-all uppercase tracking-widest">
-                    Register Taxonomy
-                </button>
+                <button type="submit" class="flex-1 py-3 bg-[#2D3432] text-white rounded-xl text-[11px] font-black hover:bg-black transition-all uppercase tracking-widest shadow-lg">Register Taxonomy</button>
             </div>
         </form>
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
+    $(document).ready(function() {
+        $("#sidebar-placeholder").load("../fragments/admin_sidebar.html", function() {
+            $("#nav-categories").addClass("active");
+        });
+    });
+
     function toggleCatModal(show) {
         const modal = document.getElementById('catModal');
         const content = document.getElementById('modalContent');

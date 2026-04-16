@@ -39,7 +39,6 @@
         .admin-btn-signin { border: 1px solid #7c6ff7; color: #7c6ff7; font-weight: 600; padding: 0.5rem 1.5rem; border-radius: 9999px; font-size: 13px; transition: all 0.2s; text-decoration: none; }
         .admin-btn-signin:hover { background: #7c6ff7; color: white; }
 
-        /* Modal Overlay */
         #addUserModal {
             display: none;
             position: fixed;
@@ -55,24 +54,12 @@
 </head>
 <body>
 
-<aside>
-    <div class="p-8 mb-4">
-        <h1 class="text-white font-bold text-xl tracking-widest uppercase">BLEB <span class="text-[#ac8aff]">ADMIN</span></h1>
-    </div>
-    <nav class="flex flex-col">
-        <a href="dashboard.html" class="nav-item"><span class="material-symbols-outlined">dashboard</span><span>DASHBOARD</span></a>
-        <a href="users.html" class="nav-item"><span class="material-symbols-outlined">group</span><span>USERS</span></a>
-        <a href="posts.html" class="nav-item"><span class="material-symbols-outlined">description</span><span>POSTS</span></a>
-        <a href="categories-tags.html" class="nav-item"><span class="material-symbols-outlined">group</span><span>CATEGORIES & TAGS</span></a>
-    </nav>
-</aside>
+<div id="sidebar-placeholder"></div>
 
 <header>
     <h2 class="text-lg font-bold text-[#2D3432] uppercase">User Management</h2>
     <div class="flex items-center gap-6">
         <button class="relative text-slate-400 hover:text-[#ac8aff]"><span class="material-symbols-outlined">notifications</span></button>
-        <div class="h-6 w-[1px] bg-slate-200"></div>
-        <a href="admin-login.html" class="admin-btn-signin">Sign In</a>
     </div>
 </header>
 
@@ -124,7 +111,6 @@
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>
-
         <form class="p-8 space-y-6" onsubmit="event.preventDefault(); alert('User Added!'); toggleModal(false);">
             <div class="space-y-2">
                 <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Full Name</label>
@@ -135,7 +121,6 @@
                     <input type="text" required class="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-[#ac8aff]/20 focus:border-[#ac8aff] outline-none transition-all" placeholder="Nguyễn Ngô Hoàng Tú">
                 </div>
             </div>
-
             <div class="space-y-2">
                 <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email Address</label>
                 <div class="relative">
@@ -145,7 +130,6 @@
                     <input type="email" required class="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-[#ac8aff]/20 focus:border-[#ac8aff] outline-none transition-all" placeholder="user@example.com">
                 </div>
             </div>
-
             <div class="space-y-2">
                 <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Assign Role</label>
                 <div class="relative">
@@ -158,22 +142,27 @@
                     </select>
                 </div>
             </div>
-
             <div class="pt-4 flex gap-3">
                 <button type="button" onclick="toggleModal(false)" class="flex-1 py-3 text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest">Cancel</button>
-                <button type="submit" class="flex-1 py-3 bg-[#ac8aff] text-white rounded-xl text-sm font-bold hover:brightness-105 shadow-lg shadow-[#ac8aff]/20 transition-all uppercase tracking-widest">
-                    Save User
-                </button>
+                <button type="submit" class="flex-1 py-3 bg-[#ac8aff] text-white rounded-xl text-sm font-bold hover:brightness-105 shadow-lg shadow-[#ac8aff]/20 transition-all uppercase tracking-widest">Save User</button>
             </div>
         </form>
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
+    $(document).ready(function() {
+        // Tải Sidebar từ tệp fragment
+        $("#sidebar-placeholder").load("../fragments/admin_sidebar.html", function() {
+            // Đánh dấu mục hiện tại là active sau khi load xong
+            $("#nav-users").addClass("active");
+        });
+    });
+
     function toggleModal(show) {
         const modal = document.getElementById('addUserModal');
         const content = document.getElementById('modalContent');
-
         if (show) {
             modal.classList.add('active');
             setTimeout(() => {
@@ -183,9 +172,7 @@
         } else {
             content.classList.remove('scale-100', 'opacity-100');
             content.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => {
-                modal.classList.remove('active');
-            }, 200);
+            setTimeout(() => { modal.classList.remove('active'); }, 200);
         }
     }
 </script>
