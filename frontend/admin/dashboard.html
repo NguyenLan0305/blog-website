@@ -30,13 +30,11 @@
         ::-webkit-scrollbar { display: none; }
         html { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Sidebar Admin */
         aside {
             position: fixed; left: 0; top: 0; height: 100vh; width: 220px;
             background-color: #2D3432; z-index: 1000;
         }
 
-        /* Navbar Admin */
         header {
             position: fixed; top: 0; right: 0; left: 220px; height: 64px;
             background: white; border-bottom: 1px solid rgba(0,0,0,0.05);
@@ -56,22 +54,6 @@
             color: white; background: rgba(172, 138, 255, 0.08);
             border-right: 4px solid #ac8aff;
         }
-
-        .admin-btn-signin {
-            border: 1px solid #7c6ff7;
-            color: #7c6ff7;
-            font-weight: 600;
-            padding: 0.5rem 1.5rem;
-            border-radius: 9999px;
-            font-size: 13px;
-            transition: all 0.2s;
-            text-decoration: none;
-        }
-        .admin-btn-signin:hover {
-            background: #7c6ff7;
-            color: white;
-            box-shadow: 0 4px 12px rgba(124, 111, 247, 0.2);
-        }
     </style>
 </head>
 <body>
@@ -85,8 +67,8 @@
 
     <div class="flex items-center gap-6">
         <button class="relative text-slate-400 hover:text-[#ac8aff] transition-colors">
-            <span class="material-symbols-outlined">notifications</span>
-            <span class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+            <span class="material-symbols-outlined text-[22px]">chat_bubble_outline</span>
+            <span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#ac8aff]/60 rounded-full border-2 border-white"></span>
         </button>
     </div>
 </header>
@@ -95,14 +77,94 @@
     <div class="mb-10">
         <h3 class="text-xl font-medium text-slate-400">System Overview</h3>
     </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        <div class="bg-white p-6 shadow-sm border border-slate-100 rounded-sm">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Users</p>
+            <h4 class="text-3xl font-black mt-2 text-slate-800">1,234</h4>
+            <div class="mt-4 flex items-center gap-2">
+                <span class="text-[10px] px-2 py-0.5 bg-green-50 text-green-500 font-bold rounded">+12.4%</span>
+                <span class="text-[10px] text-slate-400 font-bold uppercase">vs last month</span>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 shadow-sm border border-slate-100 rounded-sm">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Posts</p>
+            <h4 class="text-3xl font-black mt-2 text-slate-800">567</h4>
+            <div class="mt-4 flex items-center gap-2">
+                <span class="text-[10px] px-2 py-0.5 bg-green-50 text-green-500 font-bold rounded">+2.1%</span>
+                <span class="text-[10px] text-slate-400 font-bold uppercase">vs last month</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white p-8 shadow-sm border border-slate-100 rounded-sm mb-10">
+        <div class="flex justify-between items-start mb-12">
+            <div>
+                <p class="text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-1">Metrics Overview</p>
+                <h4 class="text-2xl font-bold text-slate-700">Weekly New Posts</h4>
+            </div>
+            <div class="flex gap-3">
+                <button class="bg-[#2D3432] text-white px-5 py-2 text-[10px] font-bold uppercase tracking-widest rounded-sm hover:bg-black transition-colors">Download PDF</button>
+                <button class="bg-white border border-slate-200 text-slate-500 px-5 py-2 text-[10px] font-bold uppercase tracking-widest rounded-sm hover:bg-slate-50 transition-colors">Export CSV</button>
+            </div>
+        </div>
+
+        <div class="relative h-64 border-b border-slate-100 flex flex-col justify-between">
+            <div class="border-t border-slate-50 w-full h-0"></div>
+            <div class="border-t border-slate-50 w-full h-0"></div>
+            <div class="border-t border-slate-50 w-full h-0"></div>
+
+            <div class="absolute -bottom-8 w-full flex justify-between px-4">
+                <span class="text-[9px] font-bold text-slate-300 uppercase tracking-tighter">Mon</span>
+                <span class="text-[9px] font-bold text-slate-300 uppercase tracking-tighter">Tue</span>
+                <span class="text-[9px] font-bold text-slate-300 uppercase tracking-tighter">Wed</span>
+                <span class="text-[9px] font-bold text-slate-300 uppercase tracking-tighter">Thu</span>
+                <span class="text-[9px] font-bold text-slate-300 uppercase tracking-tighter">Fri</span>
+                <span class="text-[9px] font-bold text-slate-300 uppercase tracking-tighter">Sat</span>
+                <span class="text-[9px] font-bold text-slate-300 uppercase tracking-tighter">Sun</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white shadow-sm border border-slate-100 rounded-sm overflow-hidden">
+        <div class="p-6 border-b border-slate-50 flex justify-between items-center">
+            <h4 class="text-[10px] font-black uppercase tracking-widest text-slate-600">Recent Posts</h4>
+            <a href="posts.html" class="text-[10px] font-bold text-slate-400 hover:text-[#ac8aff] uppercase tracking-tighter transition-colors">View All</a>
+        </div>
+        <table class="w-full text-left text-sm">
+            <thead>
+            <tr class="text-[10px] text-slate-400 uppercase border-b border-slate-50 font-bold bg-slate-50/30">
+                <th class="px-6 py-4">Title</th>
+                <th class="px-6 py-4">Author</th>
+                <th class="px-6 py-4 text-right">Date</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50 text-slate-600">
+            <tr class="hover:bg-slate-50 transition-colors">
+                <td class="px-6 py-5 font-medium text-slate-800">The Future of Minimalist UI</td>
+                <td class="px-6 py-5">A. Vance</td>
+                <td class="px-6 py-5 text-right font-mono text-xs text-slate-400">Oct 12, 2023</td>
+            </tr>
+            <tr class="hover:bg-slate-50 transition-colors">
+                <td class="px-6 py-5 font-medium text-slate-800">Why Typography Matters</td>
+                <td class="px-6 py-5">S. Jobs</td>
+                <td class="px-6 py-5 text-right font-mono text-xs text-slate-400">Oct 11, 2023</td>
+            </tr>
+            <tr class="hover:bg-slate-50 transition-colors">
+                <td class="px-6 py-5 font-medium text-slate-800">The Grid System Paradox</td>
+                <td class="px-6 py-5">D. Rams</td>
+                <td class="px-6 py-5 text-right font-mono text-xs text-slate-400">Oct 10, 2023</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </main>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
     $(document).ready(function() {
-        // Hãy kiểm tra đường dẫn file admin_sidebar.html cho đúng (ví dụ: "../fragments/admin_sidebar.html")
         $("#sidebar-placeholder").load("../fragments/admin_sidebar.html", function() {
-            // Sau khi load xong, tìm đúng link Dashboard để active
             $("#nav-dashboard").addClass("active");
         });
     });
