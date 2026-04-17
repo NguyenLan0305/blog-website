@@ -43,9 +43,19 @@ public class UserService {
  }
 
  public UserResponse updateUser(UUID id, UserUpdateRequest request){
-  User u=userRepository.findById(id).orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXITED));
-  userMapper.updateUser(u,request);
-  // 🔥 SỬA Ở ĐÂY 2
+  User u = userRepository.findById(id)
+          .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXITED));
+
+  // 1. Vẫn cho Mapper tự cập nhật email, bio...
+  userMapper.updateUser(u, request);
+
+  // 2. 🔥 TỰ TAY CẬP NHẬT QUYỀN: Xóa sạch quyền cũ và nạp quyền mới vào
+  if (request.getRoles() != null && !request.getRoles().isEmpty()) {
+   u.getRoles().clear(); // Rất quan trọng: Xóa quyền USER cũ đi
+   u.getRoles().addAll(request.getRoles()); // Đắp quyền ADMIN mới vào
+  }
+
+  // 3. Lưu vào Database
   return followService.enrichUserResponse(userRepository.save(u));
  }
 
@@ -126,5 +136,9 @@ public class UserService {
 
   // 🔥 SỬA Ở ĐÂY 7: Gắn thông số & check xem User đăng nhập đã follow tác giả này chưa
   return followService.enrichUserResponse(user);
+ }
+
+ public long countTotalUsers() {
+  return userRepository.count();
  }
 }

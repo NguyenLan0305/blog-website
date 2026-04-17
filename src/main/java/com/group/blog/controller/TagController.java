@@ -24,4 +24,22 @@ public class TagController {
                 .result(tagService.getAllTags())
                 .build();
     }
+
+    @PostMapping
+    public ApiResponse<TagResponse> createTag(@RequestBody com.group.blog.dto.request.CategoryRequest request) {
+        return ApiResponse.<TagResponse>builder()
+                .result(tagService.create(request))
+                .build();
+    }
+
+    @PutMapping("/{id}")
+    public ApiResponse<TagResponse> update(@PathVariable java.util.UUID id, @RequestBody com.group.blog.dto.request.CategoryRequest request) {
+        return ApiResponse.<TagResponse>builder().result(tagService.update(id, request)).build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> delete(@PathVariable java.util.UUID id) {
+        tagService.delete(id);
+        return ApiResponse.<Void>builder().build();
+    }
 }

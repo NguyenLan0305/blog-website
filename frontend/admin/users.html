@@ -36,28 +36,33 @@
 
         .nav-item { display: flex; align-items: center; gap: 12px; padding: 14px 20px; color: #ADB3B0; text-decoration: none; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; transition: all 0.2s; }
         .nav-item:hover, .nav-item.active { color: white; background: rgba(172, 138, 255, 0.08); border-right: 4px solid #ac8aff; }
-        .admin-btn-signin { border: 1px solid #7c6ff7; color: #7c6ff7; font-weight: 600; padding: 0.5rem 1.5rem; border-radius: 9999px; font-size: 13px; transition: all 0.2s; text-decoration: none; }
-        .admin-btn-signin:hover { background: #7c6ff7; color: white; }
 
-        #addUserModal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(4px);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
+        /* Modal Styles */
+        #userModal {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px); z-index: 2000; align-items: center; justify-content: center;
         }
-        #addUserModal.active { display: flex; }
+        #userModal.active { display: flex; }
+
+        /* Toast Styling */
+        #toast {
+            visibility: hidden; min-width: 250px; background-color: #2D3432; color: #fff;
+            text-align: center; border-radius: 8px; padding: 16px; position: fixed;
+            z-index: 3000; right: 30px; bottom: 30px; font-size: 14px; font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
     </style>
 </head>
 <body>
 
+<div id="toast">Action completed successfully!</div>
+
 <div id="sidebar-placeholder"></div>
 
 <header>
-    <h2 class="text-lg font-bold text-[#2D3432] uppercase">User Management</h2>
+    <h2 class="text-lg font-bold text-[#2D3432] uppercase tracking-tight">User Management</h2>
     <div class="flex items-center gap-6">
         <button class="relative text-slate-400 hover:text-[#ac8aff]"><span class="material-symbols-outlined">notifications</span></button>
     </div>
@@ -67,9 +72,9 @@
     <div class="flex justify-between items-center mb-8 bg-white/50 p-4 rounded-lg border border-slate-100 shadow-sm">
         <div class="relative w-full max-w-md">
             <span class="absolute inset-y-0 left-3 flex items-center text-slate-400"><span class="material-symbols-outlined text-[20px]">search</span></span>
-            <input class="w-full bg-white border border-slate-200 rounded-lg pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ac8aff]/20 transition-all" placeholder="Search users by name or email..." type="text"/>
+            <input id="search-input" class="w-full bg-white border border-slate-200 rounded-lg pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#ac8aff]/20 transition-all" placeholder="Search users by username or email..." type="text"/>
         </div>
-        <button onclick="toggleModal(true)" class="bg-[#2D3432] text-white px-6 py-3 rounded-lg font-bold text-sm flex items-center gap-2 hover:bg-black transition-colors shadow-lg">
+        <button onclick="openCreateModal()" class="bg-[#2D3432] text-white px-6 py-3 rounded-lg font-bold text-sm flex items-center gap-2 hover:bg-black transition-colors shadow-lg">
             <span class="material-symbols-outlined text-[20px]">person_add</span>
             CREATE NEW USER
         </button>
@@ -85,66 +90,61 @@
                 <th class="p-6 text-right">Actions</th>
             </tr>
             </thead>
-            <tbody class="divide-y divide-slate-50 text-slate-600">
-            <tr class="hover:bg-slate-50 transition-colors">
-                <td class="p-6 flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-400 text-xs">AW</div>
-                    <span class="font-medium text-slate-800">Alexander Wright</span>
-                </td>
-                <td class="p-6 font-mono text-xs text-slate-400">alex.wright@blogadmin.com</td>
-                <td class="p-6"><span class="px-2 py-0.5 bg-purple-50 text-[#ac8aff] text-[10px] font-bold rounded uppercase">Admin</span></td>
-                <td class="p-6 text-right text-slate-300">
-                    <button class="hover:text-[#ac8aff] mr-3"><span class="material-symbols-outlined text-lg">edit</span></button>
-                    <button class="hover:text-red-400"><span class="material-symbols-outlined text-lg">block</span></button>
-                </td>
-            </tr>
+            <tbody id="users-tbody" class="divide-y divide-slate-50 text-slate-600">
             </tbody>
         </table>
     </div>
 </main>
 
-<div id="addUserModal" onclick="if(event.target == this) toggleModal(false)">
-    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden transform transition-all scale-95 opacity-0 duration-200" id="modalContent">
-        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-            <h3 class="font-bold text-lg text-[#2D3432] uppercase tracking-tight">Add New User</h3>
-            <button onclick="toggleModal(false)" class="text-slate-400 hover:text-slate-600 transition-colors">
+<div id="userModal" onclick="if(event.target == this) toggleModal(false)">
+    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden transform transition-all scale-95 opacity-0 duration-200" id="modalContent">
+        <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <h3 id="modal-title" class="font-bold text-lg text-[#2D3432] uppercase tracking-tight">Add New User</h3>
+            <button type="button" onclick="toggleModal(false)" class="text-slate-400 hover:text-slate-600 transition-colors">
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>
-        <form class="p-8 space-y-6" onsubmit="event.preventDefault(); alert('User Added!'); toggleModal(false);">
-            <div class="space-y-2">
-                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Full Name</label>
+        <form class="p-6 space-y-4" onsubmit="saveUser(event)">
+            <input type="hidden" id="modal-user-id">
+
+            <div class="space-y-1.5">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Username <span class="text-red-500">*</span></label>
                 <div class="relative">
-                    <span class="absolute inset-y-0 left-3 flex items-center text-slate-300">
-                        <span class="material-symbols-outlined text-[18px]">person</span>
-                    </span>
-                    <input type="text" required class="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-[#ac8aff]/20 focus:border-[#ac8aff] outline-none transition-all" placeholder="Nguyễn Ngô Hoàng Tú">
+                    <span class="absolute inset-y-0 left-3 flex items-center text-slate-300"><span class="material-symbols-outlined text-[18px]">person</span></span>
+                    <input type="text" id="modal-username" required class="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-[#ac8aff]/20 focus:border-[#ac8aff] outline-none transition-all" placeholder="Enter username">
                 </div>
             </div>
-            <div class="space-y-2">
+
+            <div class="space-y-1.5" id="password-group">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Password <span class="text-red-500">*</span></label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-3 flex items-center text-slate-300"><span class="material-symbols-outlined text-[18px]">lock</span></span>
+                    <input type="password" id="modal-password" class="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-[#ac8aff]/20 focus:border-[#ac8aff] outline-none transition-all" placeholder="Enter password">
+                </div>
+            </div>
+
+            <div class="space-y-1.5">
                 <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email Address</label>
                 <div class="relative">
-                    <span class="absolute inset-y-0 left-3 flex items-center text-slate-300">
-                        <span class="material-symbols-outlined text-[18px]">mail</span>
-                    </span>
-                    <input type="email" required class="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-[#ac8aff]/20 focus:border-[#ac8aff] outline-none transition-all" placeholder="user@example.com">
+                    <span class="absolute inset-y-0 left-3 flex items-center text-slate-300"><span class="material-symbols-outlined text-[18px]">mail</span></span>
+                    <input type="email" id="modal-email" class="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-[#ac8aff]/20 focus:border-[#ac8aff] outline-none transition-all" placeholder="Optional email">
                 </div>
             </div>
-            <div class="space-y-2">
+
+            <div class="space-y-1.5">
                 <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Assign Role</label>
                 <div class="relative">
-                    <span class="absolute inset-y-0 left-3 flex items-center text-slate-300">
-                        <span class="material-symbols-outlined text-[18px]">shield_person</span>
-                    </span>
-                    <select class="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-[#ac8aff]/20 focus:border-[#ac8aff] outline-none bg-white appearance-none cursor-pointer">
-                        <option value="user">User</option>
-                        <option value="admin">Admin</option>
+                    <span class="absolute inset-y-0 left-3 flex items-center text-slate-300"><span class="material-symbols-outlined text-[18px]">shield_person</span></span>
+                    <select id="modal-role" class="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-[#ac8aff]/20 focus:border-[#ac8aff] outline-none bg-white appearance-none cursor-pointer">
+                        <option value="USER">User</option>
+                        <option value="ADMIN">Admin</option>
                     </select>
                 </div>
             </div>
-            <div class="pt-4 flex gap-3">
-                <button type="button" onclick="toggleModal(false)" class="flex-1 py-3 text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest">Cancel</button>
-                <button type="submit" class="flex-1 py-3 bg-[#ac8aff] text-white rounded-xl text-sm font-bold hover:brightness-105 shadow-lg shadow-[#ac8aff]/20 transition-all uppercase tracking-widest">Save User</button>
+
+            <div class="pt-2 flex gap-3">
+                <button type="button" onclick="toggleModal(false)" class="flex-1 py-2.5 bg-slate-100 text-sm font-bold text-slate-500 rounded-xl hover:bg-slate-200 transition-colors uppercase tracking-widest">Cancel</button>
+                <button type="submit" class="flex-1 py-2.5 bg-[#2D3432] text-white rounded-xl text-sm font-bold hover:bg-black shadow-lg transition-all uppercase tracking-widest">Save User</button>
             </div>
         </form>
     </div>
@@ -152,28 +152,192 @@
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
+    const API_BASE = "http://localhost:8080";
+    let allUsers = [];
+
     $(document).ready(function() {
-        // Tải Sidebar từ tệp fragment
         $("#sidebar-placeholder").load("../fragments/admin_sidebar.html", function() {
-            // Đánh dấu mục hiện tại là active sau khi load xong
             $("#nav-users").addClass("active");
+        });
+
+        loadUsers();
+
+        // Real-time Search
+        $('#search-input').on('input', function() {
+            const keyword = $(this).val().toLowerCase();
+            const filtered = allUsers.filter(u =>
+                (u.username && u.username.toLowerCase().includes(keyword)) ||
+                (u.email && u.email.toLowerCase().includes(keyword))
+            );
+            renderUsers(filtered);
         });
     });
 
+    function showToast(message) {
+        const x = document.getElementById("toast");
+        x.innerText = message;
+        x.style.visibility = "visible";
+        x.style.animation = "fadein 0.5s, fadeout 0.5s 2.5s";
+        setTimeout(() => { x.style.visibility = "hidden"; x.style.animation = ""; }, 3000);
+    }
+
+    function loadUsers() {
+        const token = localStorage.getItem('token');
+        $.ajax({
+            url: `${API_BASE}/users`,
+            type: 'GET',
+            headers: { 'Authorization': 'Bearer ' + token },
+            success: function(res) {
+                allUsers = res.result || [];
+                renderUsers(allUsers);
+            },
+            error: function(err) {
+                console.error("Failed to load users", err);
+            }
+        });
+    }
+
+    function renderUsers(usersArray) {
+        const $tbody = $('#users-tbody').empty();
+
+        if (!usersArray || usersArray.length === 0) {
+            $tbody.append('<tr><td colspan="4" class="p-6 text-center text-slate-400">No users found.</td></tr>');
+            return;
+        }
+
+        usersArray.forEach(user => {
+            const isAdmin = user.roles && user.roles.includes('ADMIN');
+
+            const roleBadge = isAdmin
+                ? '<span class="px-2 py-0.5 bg-purple-50 text-[#ac8aff] text-[10px] font-bold rounded uppercase">Admin</span>'
+                : '<span class="px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-bold rounded uppercase">User</span>';
+
+            const emailDisplay = user.email
+                ? user.email
+                : '<span class="italic text-slate-300">Not provided</span>';
+
+            // Xử lý hiển thị Avatar thực tế hoặc chữ cái đầu
+            let avatarHtml = '';
+            if (user.avatarUrl) {
+                avatarHtml = `<img src="${user.avatarUrl}" alt="avatar" class="w-9 h-9 rounded-full object-cover border border-slate-200">`;
+            } else {
+                const initial = user.username ? user.username.charAt(0).toUpperCase() : '?';
+                avatarHtml = `<div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-400 text-xs">${initial}</div>`;
+            }
+
+            $tbody.append(`
+                <tr class="hover:bg-slate-50 transition-colors border-b border-slate-50">
+                    <td class="p-6 flex items-center gap-3">
+                        ${avatarHtml}
+                        <span class="font-medium text-slate-800">${user.username}</span>
+                    </td>
+                    <td class="p-6 font-mono text-xs text-slate-500">${emailDisplay}</td>
+                    <td class="p-6">${roleBadge}</td>
+                    <td class="p-6 text-right text-slate-300">
+                        <button onclick="openEditModal('${user.id}')" class="hover:text-[#ac8aff] transition-colors" title="Edit User">
+                            <span class="material-symbols-outlined text-lg">edit</span>
+                        </button>
+                    </td>
+                </tr>
+            `);
+        });
+    }
+
+    /* Modal Logic */
     function toggleModal(show) {
-        const modal = document.getElementById('addUserModal');
+        const modal = document.getElementById('userModal');
         const content = document.getElementById('modalContent');
         if (show) {
             modal.classList.add('active');
-            setTimeout(() => {
-                content.classList.remove('scale-95', 'opacity-0');
-                content.classList.add('scale-100', 'opacity-100');
-            }, 10);
+            setTimeout(() => { content.classList.remove('scale-95', 'opacity-0'); content.classList.add('scale-100', 'opacity-100'); }, 10);
         } else {
-            content.classList.remove('scale-100', 'opacity-100');
-            content.classList.add('scale-95', 'opacity-0');
+            content.classList.remove('scale-100', 'opacity-100'); content.classList.add('scale-95', 'opacity-0');
             setTimeout(() => { modal.classList.remove('active'); }, 200);
         }
+    }
+
+    function openCreateModal() {
+        $('#modal-title').text('Create New User');
+        $('#modal-user-id').val('');
+        $('#modal-username').val('').prop('readonly', false);
+        $('#modal-password').val('').prop('required', true);
+        $('#password-group').show();
+        $('#modal-email').val('');
+        $('#modal-role').val('USER');
+        toggleModal(true);
+    }
+
+    function openEditModal(userId) {
+        const user = allUsers.find(u => u.id === userId);
+        if (!user) return;
+
+        $('#modal-title').text('Edit User Role & Info');
+        $('#modal-user-id').val(user.id);
+        $('#modal-username').val(user.username).prop('readonly', true); // Không cho sửa username
+        $('#modal-password').val('').prop('required', false);
+        $('#password-group').hide(); // Ẩn trường password khi edit
+        $('#modal-email').val(user.email || '');
+
+        const currentRole = (user.roles && user.roles.includes('ADMIN')) ? 'ADMIN' : 'USER';
+        $('#modal-role').val(currentRole);
+
+        toggleModal(true);
+    }
+
+    function saveUser(e) {
+        e.preventDefault();
+
+        const id = $('#modal-user-id').val();
+        const username = $('#modal-username').val().trim();
+        const email = $('#modal-email').val().trim();
+        const password = $('#modal-password').val();
+        const role = $('#modal-role').val();
+
+        // Validate Format Email (Chỉ chạy nếu người dùng có nhập)
+        if (email !== "") {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert("Invalid email format! Please enter a valid email address.");
+                return;
+            }
+        }
+
+        if (!confirm("Are you sure you want to save this user's information?")) return;
+
+        let url = `${API_BASE}/users`;
+        let method = 'POST';
+
+        // Payload chuẩn gửi kèm Array roles
+        let payload = {
+            username: username,
+            email: email,
+            roles: [role]
+        };
+
+        if (id) {
+            url = `${API_BASE}/users/${id}`;
+            method = 'PUT';
+        } else {
+            payload.password = password;
+        }
+
+        $.ajax({
+            url: url,
+            type: method,
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                'Content-Type': 'application/json'
+            },
+            data: JSON.stringify(payload),
+            success: function() {
+                showToast("User saved successfully!");
+                toggleModal(false);
+                loadUsers(); // Reload Data
+            },
+            error: function(err) {
+                alert("Action failed: " + (err.responseJSON?.message || "Server Error. Check terminal."));
+            }
+        });
     }
 </script>
 

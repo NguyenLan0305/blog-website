@@ -4,8 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @Builder
@@ -15,8 +14,7 @@ import java.time.LocalDate;
 public class UserUpdateRequest {
     @Email(message = "EMAIL_INVALID")
     String email;
-
     String bio;
     String avatarUrl;
-
+    Set<String> roles;
 }

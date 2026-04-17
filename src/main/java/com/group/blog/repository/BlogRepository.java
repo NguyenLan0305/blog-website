@@ -79,4 +79,6 @@ public interface BlogRepository extends JpaRepository<Blog, UUID> {
             "FROM Blog b WHERE b.author.username = :username AND b.draft = false " +
             "ORDER BY b.createdAt DESC")
     List<Object[]> findPublishedByAuthorUsernameWithCounts(@Param("username") String username);
+
+    List<Blog> findTop5ByOrderByCreatedAtDesc();
 }

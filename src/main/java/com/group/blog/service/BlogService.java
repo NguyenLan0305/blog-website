@@ -346,4 +346,14 @@ public class BlogService {
         List<Object[]> results = blogRepository.findPublishedByAuthorUsernameWithCounts(username);
         return results.stream().map(this::mapRowToBlogResponse).toList();
     }
+
+    public long countTotalBlogs() {
+        return blogRepository.count();
+    }
+
+    public List<BlogResponse> getRecentBlogs(int limit) {
+        return blogRepository.findTop5ByOrderByCreatedAtDesc().stream()
+                .map(blogMapper::toBlogResponse)
+                .toList();
+    }
 }

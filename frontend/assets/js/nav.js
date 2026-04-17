@@ -19,16 +19,50 @@ function navigate(page) {
 }
 
 /* ─────────────── AUTHENTICATION UI TOGGLE & AVATAR SYNC ─────────────── */
+/* ─────────────── AUTHENTICATION UI TOGGLE & AVATAR SYNC ─────────────── */
 function updateNavAuth() {
     const isAuth = S.isAuth;
     const uname = S.uname;
+    const token = localStorage.getItem('token');
 
-    if (isAuth) {
+    if (isAuth && token) {
         $('.nav-guest').attr('style', 'display: none !important');
         $('.nav-user').attr('style', 'display: flex !important');
         $('#nav-username, #mob-nav-username').text(uname);
 
-        // 1. Lấy Avatar từ bộ nhớ đệm (giúp tải trang siêu nhanh, không bị nháy chữ cái đầu)
+        // --- MỔ TOKEN ĐỂ CHECK QUYỀN ADMIN ---
+        let isAdmin = false;
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            // Fix lỗi font tiếng Việt khi giải mã token
+            const payload = JSON.parse(decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join('')));
+
+            // Lấy quyền từ thuộc tính scope (Spring Boot trả về ở đây)
+            const roles = payload.scope || payload.roles || "";
+            if (roles.includes("ADMIN")) {
+                isAdmin = true;
+            }
+        } catch (e) {
+            console.error("Lỗi giải mã token:", e);
+        }
+
+        // --- CẬP NHẬT GIAO DIỆN THEO QUYỀN ---
+        if (isAdmin) {
+            $('#btn-desk-admin').show();
+            $('#btn-mob-admin').attr('style', 'display: flex !important; color: #ac8aff; font-weight: 600;');
+            $('.d-role').text('Admin'); // Đổi chữ Author thành Admin
+            $('.d-role').css('color', '#ac8aff'); // Đổi màu chữ cho ngầu
+        } else {
+            $('#btn-desk-admin').hide();
+            $('#btn-mob-admin').attr('style', 'display: none !important;');
+            $('.d-role').text('Author'); // Trả về mặc định
+            $('.d-role').css('color', 'var(--t2)');
+        }
+
+        // Lấy Avatar
         const savedAvatar = localStorage.getItem('avatarUrl');
         if (savedAvatar) {
             $('#nav-avatar, #mob-nav-avatar').html(`<img src="${savedAvatar}" alt="avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`);
@@ -37,7 +71,6 @@ function updateNavAuth() {
             $('#nav-avatar, #mob-nav-avatar').text(userInitials);
         }
 
-        // 2. Gọi API ngầm để kiểm tra xem User có đổi Avatar hay không, nếu có thì Update lại
         callApi('/users/my-profile', 'GET').done(function(res) {
             if (res.result && res.result.avatarUrl && res.result.avatarUrl !== savedAvatar) {
                 localStorage.setItem('avatarUrl', res.result.avatarUrl);
@@ -45,11 +78,13 @@ function updateNavAuth() {
             }
         });
 
-        // 3. Kích hoạt đếm thông báo
         checkUnreadNotifications();
     } else {
+        // NẾU CHƯA ĐĂNG NHẬP
         $('.nav-guest').attr('style', 'display: flex !important');
         $('.nav-user').attr('style', 'display: none !important');
+        $('#btn-desk-admin').hide();
+        $('#btn-mob-admin').attr('style', 'display: none !important;');
     }
 }
 

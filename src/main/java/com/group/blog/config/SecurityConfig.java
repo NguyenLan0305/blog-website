@@ -31,21 +31,33 @@ public class SecurityConfig {
             "/auth/introspect"
     };
 
-    // Các API dùng phương thức GET được phép truy cập tự do để đọc dữ liệu
+    // Các API và View dùng phương thức GET được phép truy cập tự do
     private final String[] PUBLIC_GET_ENDPOINTS = {
             "/assets/**", "/css/**", "/js/**",         // Tài nguyên tĩnh (frontend)
+            "/fragments/**",                           // Các file html tĩnh (sidebar, navbar...)
+
+            // --- CÁC ROUTE GIAO DIỆN (VIEW) CÔNG KHAI ---
+            "/", "/home", "/login", "/register", "/forgot-password",
+
+            // --- CÁC API DỮ LIỆU CÔNG KHAI ---
             "/categories", "/tags",                    // Danh mục, Thẻ
             "/blogs",                                  // Lấy danh sách blog
-            "/blogs/{id:[0-9a-fA-F\\-]{36}}",          // Xem chi tiết blog (Dùng Regex độ dài 36 ký tự UUID để không nhầm với /blogs/my-blogs)
+            "/blogs/{id:[0-9a-fA-F\\-]{36}}",          // Xem chi tiết blog
             "/blogs/category/**",                      // Lọc theo danh mục
             "/blogs/tag/**",                           // Lọc theo tag
             "/blogs/search/**",                        // Tìm kiếm & gợi ý
             "/blogs/filter",                           // Lọc đa luồng
             "/blogs/user/**",                          // Xem bài viết của 1 tác giả
             "/users/profile/**",                       // Xem thông tin profile của 1 tác giả
-            "/blogs/*/comments",                        // Đọc danh sách comment của bài viết
-            "/users/*/followers",                      // Cho phép xem Followers
-            "/users/*/following"                       // Cho phép xem Following
+            "/blogs/*/comments",                       // Đọc danh sách comment của bài viết
+            "/users/*/followers",                      // Xem Followers
+            "/users/*/following"                       // Xem Following
+    };
+
+    // Định nghĩa riêng các Endpoint dành cho khu vực ADMIN
+    private final String[] ADMIN_ENDPOINTS = {
+            "/api/admin/**", // Các REST API phục vụ cho trang Dashboard
+            "/admin/**"      // Các route View trả về file HTML Admin
     };
 
     @Value("${jwt.signerKey}")
@@ -56,22 +68,20 @@ public class SecurityConfig {
         httpSecurity
                 .cors(org.springframework.security.config.Customizer.withDefaults())
                 .authorizeHttpRequests(request -> request
-                        // 1. CÁC API PUBLIC (AI CŨNG VÀO ĐƯỢC)
+                        // 1. CÁC API VÀ VIEW PUBLIC (AI CŨNG VÀO ĐƯỢC)
                         .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
 
                         // 2. CÁC API ĐẶC THÙ YÊU CẦU QUYỀN ADMIN
+                        .requestMatchers(ADMIN_ENDPOINTS).hasRole(Role.ADMIN.name())
                         .requestMatchers(HttpMethod.GET, "/users").hasRole(Role.ADMIN.name())
 
-                        // 3. TẤT CẢ CÁC API CÒN LẠI ĐỀU BẮT BUỘC PHẢI ĐĂNG NHẬP (AUTHENTICATED)
-                        // Bao gồm:
-                        // - Tạo/Sửa/Xóa Blog (POST/PUT/DELETE /blogs/**)
-                        // - Lấy Blog cá nhân (GET /blogs/my-blogs)
-                        // - Like bài viết (POST /blogs/{blogId}/like)
-                        // - Gửi/Xóa Comment (POST/DELETE /blogs/comments/**)
-                        // - Quản lý Profile cá nhân (GET/PUT /users/my-profile/**)
-                        // - Tạo Category mới (POST /categories)
-                        // - /notifications, /notifications/**
+                        // Chặn quyền Thêm/Sửa/Xóa Categories & Tags chỉ dành cho Admin
+                        .requestMatchers(HttpMethod.POST, "/categories", "/tags").hasRole(Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.PUT, "/categories/**", "/tags/**").hasRole(Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.DELETE, "/categories/**", "/tags/**").hasRole(Role.ADMIN.name())
+
+                        // 3. TẤT CẢ CÁC API CÒN LẠI ĐỀU BẮT BUỘC PHẢI ĐĂNG NHẬP
                         .anyRequest().authenticated()
                 );
 
@@ -84,7 +94,7 @@ public class SecurityConfig {
         // Tắt CSRF (Vì dùng Token JWT)
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
 
-        // Ép Spring Security hoạt động ở chế độ Stateless (Không lưu trạng thái Session)
+        // Chế độ Stateless
         httpSecurity.sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         );

@@ -32,6 +32,33 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
+    @Transactional
+    public CategoryResponse update(java.util.UUID id, CategoryRequest request) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category does not exist"));
+
+        // Kiểm tra xem tên mới có bị trùng với category khác không
+        if (!category.getName().equals(request.getName()) && categoryRepository.existsByName(request.getName())) {
+            throw new RuntimeException("This Category already exists");
+        }
+
+        category.setName(request.getName());
+        category = categoryRepository.save(category);
+
+        return CategoryResponse.builder()
+                .id(category.getId())
+                .name(category.getName())
+                .slug(SlugUtils.generateSlug(category.getName()) + "-" + category.getId().toString())
+                .postCount(0L) // Chỗ này thực tế cần query đếm số lượng, tạm để 0
+                .build();
+    }
+
+    @Transactional
+    public void delete(java.util.UUID id) {
+        if (!categoryRepository.existsById(id)) throw new RuntimeException("Category not found");
+        categoryRepository.deleteById(id);
+    }
+
     public List<CategoryResponse> getAllCategories() {
         // 1. Gọi hàm tối ưu lấy 1 lần duy nhất từ DB
         List<Object[]> results = categoryRepository.findAllCategoriesWithPostCount();

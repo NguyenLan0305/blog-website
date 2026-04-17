@@ -20,6 +20,13 @@ import java.util.List;
 public class CategoryController {
     CategoryService categoryService;
 
+    @GetMapping
+    public ApiResponse<List<CategoryResponse>> getAll() {
+        return ApiResponse.<List<CategoryResponse>>builder()
+                .result(categoryService.getAllCategories())
+                .build();
+    }
+
     @PostMapping
     public ApiResponse<Category> create(@RequestBody CategoryRequest request) {
         return ApiResponse.<Category>builder()
@@ -27,10 +34,16 @@ public class CategoryController {
                 .build();
     }
 
-    @GetMapping
-    public ApiResponse<List<CategoryResponse>> getAll() {
-        return ApiResponse.<List<CategoryResponse>>builder()
-                .result(categoryService.getAllCategories())
+    @PutMapping("/{id}")
+    public ApiResponse<CategoryResponse> update(@PathVariable java.util.UUID id, @RequestBody CategoryRequest request) {
+        return ApiResponse.<CategoryResponse>builder()
+                .result(categoryService.update(id, request))
                 .build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> delete(@PathVariable java.util.UUID id) {
+        categoryService.delete(id);
+        return ApiResponse.<Void>builder().build();
     }
 }
