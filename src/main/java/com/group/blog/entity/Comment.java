@@ -36,7 +36,7 @@ public class Comment {
     @JoinColumn(name = "parent_id")
     Comment parent;
 
-    // 🔥 THÊM ĐOẠN NÀY ĐỂ LẤY DANH SÁCH REPLY DỄ DÀNG HƠN
+    // 1 comment có thể có nhiều phản hồi
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("createdAt ASC")
     List<Comment> replies;

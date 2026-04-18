@@ -13,7 +13,12 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
 
     boolean existsByName(String name);
 
-    // 🔥 CÂU TRUY VẤN TỐI ƯU: Lấy Category và đếm số Blog thuộc về nó
-    @Query("SELECT c, (SELECT COUNT(b) FROM Blog b WHERE b.category = c) FROM Category c")
+    // Lấy tất cả Category và đếm mỗi chủ đề có bao nhiêu bài viết
+    @Query("""
+     SELECT c,COUNT(b.id)
+     FROM Category c
+     LEFT JOIN c.blogs b
+     GROUP BY c
+    """)
     List<Object[]> findAllCategoriesWithPostCount();
 }

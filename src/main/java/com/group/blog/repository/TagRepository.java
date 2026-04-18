@@ -14,11 +14,16 @@ import java.util.UUID;
     public interface TagRepository extends JpaRepository<Tag, UUID> {
         Optional<Tag> findByName(String name);
 
-    boolean existsByName(String name);
+        boolean existsByName(String name);
 
-    // 🔥 CÂU LỆNH TỐI ƯU CHO MẠNG LƯỚI MANY-TO-MANY
-    // Đếm xem có bao nhiêu Blog đang chứa Tag này
-    @Query("SELECT t, (SELECT COUNT(b) FROM Blog b JOIN b.tags tag WHERE tag = t) FROM Tag t")
-    List<Object[]> findAllTagsWithPostCount();
+        // Đếm xem có bao nhiêu Blog đang chứa Tag này
+        @Query("""
+         SELECT t,COUNT(b.id)
+         FROM Tag t
+         LEFT JOIN t.blogs b
+         GROUP BY t
+         """)
+        List<Object[]> findAllTagsWithPostCount();
+
     }
 

@@ -352,7 +352,7 @@ public class BlogService {
     }
 
     public List<BlogResponse> getRecentBlogs(int limit) {
-        return blogRepository.findTop5ByOrderByCreatedAtDesc().stream()
+        return blogRepository.findTop5ByDraftFalseOrderByCreatedAtDesc().stream()
                 .map(blogMapper::toBlogResponse)
                 .toList();
     }

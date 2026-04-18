@@ -8,8 +8,9 @@ import java.util.UUID;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, UUID> {
+    // đếm 1 bài viết có bao nhiêu bình luận
     long countByBlogId(UUID blogId);
 
-    // Chỉ lấy các comment GỐC (parent IS NULL) để render ra ngoài cùng
+    // Chỉ lấy các comment GỐC (parent IS NULL)
     List<Comment> findByBlogIdAndParentIsNullOrderByCreatedAtDesc(UUID blogId);
 }

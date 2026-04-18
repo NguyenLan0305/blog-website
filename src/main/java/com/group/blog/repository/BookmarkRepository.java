@@ -11,8 +11,9 @@ import java.util.UUID;
 @Repository
 public interface BookmarkRepository extends JpaRepository<Bookmark, UUID> {
     boolean existsByBlogIdAndUserUsername(UUID blogId, String username);
+
     Optional<Bookmark> findByBlogIdAndUserUsername(UUID blogId, String username);
 
-    // Lấy danh sách Bookmark của một User, sắp xếp mới nhất lên đầu
+    // Lấy danh sách các bài viết đã lưu của một User, sắp xếp mới nhất lên đầu
     List<Bookmark> findByUserUsernameOrderByCreatedAtDesc(String username);
 }

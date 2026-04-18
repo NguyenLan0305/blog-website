@@ -29,7 +29,7 @@ public class Notification {
     User user;
 
     @Column(nullable = false)
-    String message; // VD: "Lan đã bình luận về bài viết của bạn"
+    String message;
 
     String targetUrl; // Link bấm vào để xem chi tiết (VD: "/blog/java-la-gi")
 
@@ -38,7 +38,6 @@ public class Notification {
 
     LocalDateTime createdAt;
 
-    // TRƯỜNG NÀY ĐỂ FRONTEND BIẾT VẼ ICON GÌ
     @Column(nullable = false)
     String type; // Chứa các giá trị: "LIKE", "COMMENT", "REPLY", "FOLLOW"
 

@@ -14,7 +14,6 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // Cho phép tất cả các đường dẫn API
-                       // .allowedOrigins("http://127.0.0.1:63342", "http://localhost:63342") // Địa chỉ của Live Server
                         .allowedOriginPatterns("*")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Các phương thức được phép
                         .allowedHeaders("*") // Cho phép tất cả các Header (Authorization, Content-Type...)

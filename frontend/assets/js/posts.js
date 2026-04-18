@@ -1,5 +1,5 @@
 /**
- * posts.js (Đã cập nhật giao diện List Ngang, Category sáng hơn, Border rõ hơn, Tim bấm được)
+ * posts.js
  */
 
 // ─────────────── HÀM XỬ LÝ TEXT THÔNG MINH ───────────────
@@ -32,6 +32,7 @@ function extractText(content, len) {
 function buildCard(p) {
     var catName = p.category ? p.category.name : 'Chưa phân loại';
     var authorName = p.author ? p.author.username : 'Anonymous';
+    var authorAvatar = (p.author && p.author.avatarUrl) ? p.author.avatarUrl : `https://ui-avatars.com/api/?name=${authorName}&background=151a22&color=ac8aff`;
     var dateStr = fmtDate(p.createdAt);
 
     // Trích xuất mô tả
@@ -45,8 +46,23 @@ function buildCard(p) {
     let readingTime = Math.ceil((plainTextContent.split(/\s+/).length || 1) / 200);
     if (readingTime === 0) readingTime = 1;
 
+    // 🔥 XỬ LÝ DANH SÁCH TAG (Nằm gọn ngang hàng, fix lỗi ##) 🔥
+    let tagsHtml = '';
+    if (p.tags && p.tags.length > 0) {
+        tagsHtml = '<div class="d-flex align-items-center flex-wrap gap-2">';
+        let maxTags = 3;
+        for (let i = 0; i < Math.min(p.tags.length, maxTags); i++) {
+            // Dọn dẹp mọi dấu # bị thừa từ Database trước khi thêm dấu # chuẩn
+            let cleanTag = p.tags[i].name.replace(/^#+/, '');
+            tagsHtml += `<span class="badge border fw-normal" style="background: rgba(172,138,255,0.05); color: #a5abba; border-color: rgba(66,72,85,0.3) !important; font-size: 0.75rem;">#${cleanTag}</span>`;
+        }
+        if (p.tags.length > maxTags) {
+            tagsHtml += `<span class="badge border fw-normal text-muted" style="background: transparent; border-color: rgba(66,72,85,0.2) !important; font-size: 0.75rem;">+${p.tags.length - maxTags}</span>`;
+        }
+        tagsHtml += '</div>';
+    }
+
     // Khởi tạo Card
-    // 🔥 CẬP NHẬT 1: Viền bottom đậm hơn (rgba(66,72,85,0.4))
     var $card = $('<article class="d-flex flex-column flex-sm-row gap-3 gap-sm-4 py-4 border-bottom" style="border-color: rgba(66,72,85,0.4) !important; border-bottom-width: 1px !important; cursor: pointer; transition: background 0.2s;">')
         .hover(
             function() { $(this).css('background-color', 'rgba(255,255,255,0.03)'); },
@@ -57,11 +73,11 @@ function buildCard(p) {
         });
 
     var cardHtml = `
-        <div class="flex-grow-1 order-2 order-sm-1">
+        <div class="flex-grow-1 order-2 order-sm-1 d-flex flex-column">
             
-            <div class="d-flex align-items-center gap-2 mb-2" style="font-size: 0.85rem; color: #a5abba;">
+            <div class="d-flex align-items-center gap-2 mb-3" style="font-size: 0.85rem; color: #a5abba;">
+                <img src="${authorAvatar}" alt="Avatar" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
                 <span class="text-white fw-bold">${authorName}</span>
-                <span>@${authorName}</span>
                 <span>•</span>
                 <span>${dateStr}</span>
             </div>
@@ -70,18 +86,19 @@ function buildCard(p) {
                 ${p.title}
             </h2>
 
-            <p class="mb-3" style="color: #a5abba; font-size: 0.95rem; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+            <p class="mb-2" style="color: #a5abba; font-size: 0.95rem; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
                 ${postExcerpt}
             </p>
 
-            <div class="d-flex align-items-center gap-3" style="font-size: 0.8rem; color: #a5abba;">
+            <div class="d-flex align-items-center flex-wrap gap-3 mt-auto pt-3" style="font-size: 0.8rem; color: #a5abba;">
                 <span style="background: rgba(224, 229, 245, 0.15); padding: 0.3rem 0.8rem; border-radius: 9999px; color: #ffffff; font-weight: 500;">
                     ${catName}
                 </span>
-                <span>${readingTime} min read</span>
                 
+                ${tagsHtml}
+              
                 <div class="ms-auto d-flex align-items-center">
-                    <span class="like-btn d-flex align-items-center gap-1" style="cursor: pointer; padding: 0.2rem 0.5rem; border-radius: 4px; transition: color 0.2s;" title="Like">
+                    <span class="like-btn d-flex align-items-center gap-1" style="padding: 0.2rem 0.5rem; color:#a5abba;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                         </svg>
@@ -97,35 +114,6 @@ function buildCard(p) {
     `;
 
     $card.html(cardHtml);
-
-    // Gắn sự kiện hover và click riêng cho nút Tim
-    $card.find('.like-btn')
-        .hover(
-            function(e) { $(this).css('color', '#ff4757'); },
-            function(e) { $(this).css('color', '#a5abba'); }
-        )
-        .on('click', function(e) {
-            e.stopPropagation(); // Ngăn chặn click lan ra thẻ cha (không chuyển trang)
-
-            // Ở đây bạn có thể gọi API like bài viết
-            // Tạm thời mình làm hiệu ứng tăng số đếm tĩnh
-            let countSpan = $(this).find('.like-count');
-            let currentCount = parseInt(countSpan.text());
-
-            // Giả lập toggle like
-            if ($(this).data('liked')) {
-                $(this).find('svg').attr('fill', 'none');
-                countSpan.text(currentCount - 1);
-                $(this).data('liked', false);
-            } else {
-                $(this).find('svg').attr('fill', '#ff4757');
-                countSpan.text(currentCount + 1);
-                $(this).data('liked', true);
-            }
-
-            // TODO: callApi('/blogs/' + p.id + '/like', 'POST')...
-        });
-
     return $card;
 }
 
@@ -133,7 +121,6 @@ function buildCard(p) {
 function skeletons(n) {
     var h = '';
     for (var i = 0; i < n; i++) {
-        // Đồng bộ viền đậm với card thật
         h += '<div class="d-flex gap-4 py-4 border-bottom" style="border-color: rgba(66,72,85,0.4) !important; border-bottom-width: 1px !important;">' +
             '<div class="flex-grow-1">' +
             '<span class="sk mb-2" style="width:150px;height:16px;display:block;"></span>' +
@@ -193,7 +180,6 @@ function updateFilterBanner() {
     }
 }
 
-// Bắt sự kiện XÓA TỪNG BỘ LỌC
 $(document).on('click', '.btn-remove-filter', function() {
     var type = $(this).data('type');
     if (type === 'keyword') {
@@ -210,7 +196,6 @@ $(document).on('click', '.btn-remove-filter', function() {
     renderPosts();
 });
 
-// Bắt sự kiện XÓA TẤT CẢ (Clear All)
 $(document).on('click', '.btn-clear-filter', function() {
     S.keyword = null; S.cat = null; S.tag = null;
     $('#nav-search-input, #mob-search-input').val('');
@@ -238,15 +223,18 @@ function renderPosts() {
     callApi(apiUrl, 'GET').done(function(res) {
         var filteredPosts = res.result || res;
 
+        if (!S.sort) {
+            S.sort = 'createdAt,desc';
+        }
+
         var parts = S.sort.split(',');
-        var f = parts[0]; // Tên trường (VD: createdAt, title)
-        var d = parts[1]; // Hướng sắp xếp (VD: asc, desc)
+        var f = parts[0];
+        var d = parts[1];
 
         filteredPosts.sort(function(a, b){
             var va = a[f] || '';
             var vb = b[f] || '';
 
-            // Nếu sắp xếp theo Tiêu đề, chuyển về chữ thường để xếp A-Z không bị lỗi phân biệt hoa/thường
             if (f === 'title') {
                 va = va.toString().toLowerCase();
                 vb = vb.toString().toLowerCase();
@@ -269,21 +257,17 @@ function renderPosts() {
             $list.append(buildCard(p));
         });
     });
-
-    // ─────────────── 5. XỬ LÝ SỰ KIỆN SẮP XẾP (SORT) ───────────────
-    $(document).ready(function() {
-        // Nếu biến S.sort chưa có giá trị, đặt mặc định là Mới nhất
-        if (!S.sort) {
-            S.sort = 'createdAt,desc';
-        }
-
-        // Đảm bảo thẻ select hiển thị đúng giá trị mặc định lúc mới tải trang
-        $('#sort-sel').val(S.sort);
-    });
-
-// Bắt sự kiện khi người dùng chọn một mục khác trong Dropdown
-    $(document).on('change', '#sort-sel', function() {
-        S.sort = $(this).val(); // Cập nhật biến toàn cục S (VD: 'title,asc')
-        renderPosts();          // Gọi hàm vẽ lại danh sách bài viết
-    });
 }
+
+// ─────────────── 5. XỬ LÝ SỰ KIỆN SẮP XẾP (SORT) ───────────────
+$(document).ready(function() {
+    if (!S.sort) {
+        S.sort = 'createdAt,desc';
+    }
+    $('#sort-sel').val(S.sort);
+});
+
+$(document).on('change', '#sort-sel', function() {
+    S.sort = $(this).val();
+    renderPosts();
+});

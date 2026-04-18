@@ -97,20 +97,20 @@
 <script src="../assets/js/nav.js"></script>
 
 <script>
-    let currentAvatarData = null;
+    let currentAvatarUrl = null; // Lưu URL (cũ hoặc mới từ Cloudinary)
+    let selectedImageFile = null; // Lưu trữ File ảnh vật lý để đẩy lên
 
     $(document).ready(function() {
         $('#navbar-container').load('../fragments/navbar.html', function() {
             if (typeof updateNavAuth === 'function') { updateNavAuth(); }
         });
-
-        // LOAD SIDEBAR
         $('#dashboard-sidebar-container').load('../fragments/dashboard-sidebar.html');
 
         if (S.isAuth) { loadProfileData(); }
         else { window.location.href = 'login.html'; }
     });
 
+    // 1. TẢI THÔNG TIN PROFILE
     function loadProfileData() {
         callApi('/users/my-profile', 'GET').done(function(res) {
             const user = res.result;
@@ -120,31 +120,32 @@
 
             if (user.avatarUrl) {
                 $('#avatar-img').attr('src', user.avatarUrl);
-                currentAvatarData = user.avatarUrl;
+                currentAvatarUrl = user.avatarUrl; // Giữ lại URL cũ nếu không đổi
             }
         }).fail(function() {
             toast('Không thể tải thông tin cá nhân!');
         });
     }
 
+    // 2. KHI CHỌN ẢNH -> TẠO LINK ẢO ĐỂ XEM TRƯỚC & LƯU FILE
     $('#avatar-upload').on('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
 
-        if (file.size > 1024 * 1024) {
-            alert('Vui lòng chọn ảnh kích thước dưới 1MB!');
+        if (file.size > 2 * 1024 * 1024) { // Cứ thả ga lên 2MB đi, Cloudinary lo
+            alert('Vui lòng chọn ảnh kích thước dưới 2MB!');
             this.value = ''; return;
         }
 
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            currentAvatarData = event.target.result;
-            $('#avatar-img').attr('src', currentAvatarData);
-        };
-        reader.readAsDataURL(file);
+        selectedImageFile = file; // Giữ lại File để lát đẩy lên Cloudinary
+
+        // Tạo link ảo (Blob URL) hiển thị ngay lập tức không cần mã hóa Base64
+        const objectUrl = URL.createObjectURL(file);
+        $('#avatar-img').attr('src', objectUrl);
     });
 
-    $('#form-edit-profile').on('submit', function(e) {
+    // 3. BẤM UPDATE -> ĐẨY ẢNH LÊN CLOUD TRƯỚC -> RỒI MỚI CẬP NHẬT PROFILE
+    $('#form-edit-profile').on('submit', async function(e) {
         e.preventDefault();
 
         const btn = $('#btn-submit');
@@ -152,23 +153,57 @@
         btn.html('<span class="material-symbols-outlined" style="animation: spin 1s linear infinite;">sync</span> Updating...');
         btn.prop('disabled', true).css('opacity', '0.7');
 
-        const requestBody = {
-            email: $('#input-email').val().trim(),
-            bio: $('#input-bio').val().trim(),
-            avatarUrl: currentAvatarData
-        };
+        try {
+            // NẾU CÓ CHỌN ẢNH MỚI -> Gọi API Upload
+            if (selectedImageFile) {
+                btn.html('<span class="material-symbols-outlined" style="animation: spin 1s linear infinite;">cloud_upload</span> Uploading Image...');
 
-        callApi('/users/my-profile', 'PUT', requestBody)
-            .done(function() { toast('Cập nhật Profile thành công!'); })
-            .fail(function(xhr) {
-                let errorMsg = 'Lỗi cập nhật. Vui lòng kiểm tra lại!';
-                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
-                alert(errorMsg);
-            })
-            .always(function() {
-                btn.html(originalText);
-                btn.prop('disabled', false).css('opacity', '1');
-            });
+                const formData = new FormData();
+                formData.append('file', selectedImageFile);
+
+                // Dùng Ajax trần vì hàm callApi mặc định đang gửi JSON
+                const uploadResponse = await $.ajax({
+                    url: 'http://localhost:8080/upload/image', // Nhớ sửa domain nếu cần
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    }
+                });
+
+                // Lấy URL xịn từ Cloudinary
+                currentAvatarUrl = uploadResponse.result;
+            }
+
+            btn.html('<span class="material-symbols-outlined" style="animation: spin 1s linear infinite;">sync</span> Saving Profile...');
+
+            // Gửi dữ liệu profile (với URL Cloudinary cực nhẹ)
+            const requestBody = {
+                email: $('#input-email').val().trim(),
+                bio: $('#input-bio').val().trim(),
+                avatarUrl: currentAvatarUrl
+            };
+
+            await callApi('/users/my-profile', 'PUT', requestBody);
+
+            // Xóa cache localStorage để Navbar ép load lại ảnh mới
+            localStorage.removeItem('avatarUrl');
+            updateNavAuth();
+            toast('Cập nhật Profile thành công!');
+
+        } catch (error) {
+            let errorMsg = 'Lỗi cập nhật. Vui lòng thử lại sau!';
+            if (error.responseJSON && error.responseJSON.message) {
+                errorMsg = error.responseJSON.message;
+            }
+            alert(errorMsg);
+        } finally {
+            btn.html(originalText);
+            btn.prop('disabled', false).css('opacity', '1');
+            selectedImageFile = null; // Xóa file bộ nhớ
+        }
     });
 </script>
 </body>

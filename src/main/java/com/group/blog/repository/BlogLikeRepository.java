@@ -9,6 +9,7 @@ import java.util.UUID;
 @Repository
 public interface BlogLikeRepository extends JpaRepository<BlogLike, UUID> {
     long countByBlogId(UUID blogId);
+
     boolean existsByBlogIdAndUserUsername(UUID blogId, String username);
 
     // Tìm like để xóa nếu user click lần 2 (Unlike)

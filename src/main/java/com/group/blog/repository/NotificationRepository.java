@@ -8,5 +8,6 @@ import java.util.UUID;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, UUID> {
+    // lấy các thông báo của 1 user theo username
     List<Notification> findByUserUsernameOrderByCreatedAtDesc(String username);
 }

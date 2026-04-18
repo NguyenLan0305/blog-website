@@ -23,11 +23,10 @@ public class BlogResponse {
     String description;
     String content;
 
+    boolean draft;
     String draftContent;
     String draftBanner;
 
-    boolean draft;
-    // Đổi sang long cho đồng bộ với kết quả trả về từ JPA count()
     long totalLikes;
     long totalComments;
     long totalReads;
@@ -36,14 +35,14 @@ public class BlogResponse {
     LocalDateTime updatedAt;
     LocalDateTime createdAt;
 
-    // Tận dụng DTO UserResponse đã tạo trước đó để làm thông tin Tác giả
     UserResponse author;
 
     CategoryResponse category;
+
     Set<TagResponse> tags;
 
-    // 🔥 THÊM TRƯỜNG NÀY: Để frontend biết user hiện tại đã like bài này chưa
+    //user hiện tại đã like bài này chưa
     boolean isLikedByCurrentUser;
-
+    //user hiện tại đã lưu bài này chưa
     boolean isBookmarkedByCurrentUser;
 }

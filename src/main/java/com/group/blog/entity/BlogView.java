@@ -26,12 +26,11 @@ public class BlogView {
     @org.hibernate.annotations.OnDelete(action = org.hibernate.annotations.OnDeleteAction.CASCADE)
     Blog blog;
 
-    // 🔥 THÊM CỘT USER: Để trống (nullable = true) vì cho phép Khách (Guest) không có tài khoản vẫn tăng View được
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     User user;
 
-    // Vẫn giữ IP để dự phòng cho Guest
+    // cho phép Khách (Guest) không có tài khoản vẫn tăng View được
     String ipAddress;
 
     LocalDateTime viewedAt;

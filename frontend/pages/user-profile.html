@@ -172,6 +172,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script src="../assets/js/app.js"></script>
+<script src="../assets/js/posts.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/nav.js"></script>
 
@@ -329,9 +330,6 @@
         });
     }
 
-    // ==========================================
-    // 2. TẢI DANH SÁCH BÀI VIẾT CỦA TÁC GIẢ
-    // ==========================================
     function loadUserBlogs(username) {
         callApi('/blogs/user/' + username, 'GET').done(function(res) {
             const blogs = res.result || [];
@@ -345,84 +343,29 @@
 
             if (blogs.length === 0) {
                 $list.html(`
-                    <div class="empty-state">
-                        <span class="material-symbols-outlined" style="font-size: 3rem; margin-bottom: 1rem;">auto_stories</span>
-                        <h3>No blogs published yet</h3>
-                        <p class="mx-auto mt-2">This space is waiting for stories to be told.</p>
-                        ${(currentUser && currentUser === username) ? '<a href="blog-editor.html" class="btn-action btn-follow text-decoration-none mt-4 mx-auto" style="width: auto; padding: 0.6rem 1.5rem; color: #000;">Write a story</a>' : ''}
-                    </div>
-                `);
+                <div class="empty-state">
+                    <span class="material-symbols-outlined" style="font-size: 3rem; margin-bottom: 1rem;">auto_stories</span>
+                    <h3>No blogs published yet</h3>
+                    <p class="mx-auto mt-2">This space is waiting for stories to be told.</p>
+                    ${(currentUser && currentUser === username)
+                    ? '<a href="blog-editor.html" class="btn-action btn-follow text-decoration-none mt-4 mx-auto" style="width: auto; padding: 0.6rem 1.5rem; color: #000;">Write a story</a>'
+                    : ''}
+                </div>
+            `);
                 return;
             }
 
+            // 🔥 DÙNG CHUNG UI VỚI HOME
             $list.empty();
+
             blogs.forEach(p => {
-                const dateStr = fmtDate(p.createdAt);
-                var catName = p.category ? p.category.name : 'Chưa phân loại';
-                var authorName = p.author ? p.author.username : username;
-                const bannerUrl = p.banner ? p.banner : 'https://placehold.co/600x400/151a22/a5abba?text=No+Image';
-
-                let plainTextContent = extractTextFromContent(p.content, 99999);
-                let readTime = Math.ceil((plainTextContent.split(/\s+/).length || 1) / 200);
-                if (readTime === 0) readTime = 1;
-                var postExcerpt = p.description ? p.description : extractTextFromContent(p.content, 180);
-
-                var $card = $('<article class="d-flex flex-column flex-sm-row gap-3 gap-sm-4 py-4 border-bottom" style="border-color: rgba(66,72,85,0.4) !important; border-bottom-width: 1px !important; cursor: pointer; transition: background 0.2s;">')
-                    .hover(
-                        function() { $(this).css('background-color', 'rgba(255,255,255,0.03)'); },
-                        function() { $(this).css('background-color', 'transparent'); }
-                    )
-                    .on('click', function(){
-                        window.location.href = 'post.html?id=' + p.slug;
-                    });
-
-                var cardHtml = `
-                    <div class="flex-grow-1 order-2 order-sm-1">
-                        <div class="d-flex align-items-center gap-2 mb-2" style="font-size: 0.85rem; color: #a5abba;">
-                            <span class="text-white fw-bold">${authorName}</span>
-                            <span>@${authorName}</span>
-                            <span>•</span>
-                            <span>${dateStr}</span>
-                        </div>
-
-                        <h2 class="mb-2" style="font-family: 'Newsreader', serif; font-size: 1.5rem; font-weight: 700; color: #e0e5f5; line-height: 1.3;">
-                            ${p.title}
-                        </h2>
-
-                        <p class="mb-3" style="color: #a5abba; font-size: 0.95rem; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                            ${postExcerpt}
-                        </p>
-
-                        <div class="d-flex align-items-center gap-3" style="font-size: 0.8rem; color: #a5abba;">
-                            <span style="background: rgba(224, 229, 245, 0.15); padding: 0.3rem 0.8rem; border-radius: 9999px; color: #ffffff; font-weight: 500;">
-                                ${catName}
-                            </span>
-                            <span>${readTime} min read</span>
-
-                            <div class="ms-auto d-flex align-items-center">
-                                <span class="like-btn d-flex align-items-center gap-1" style="cursor: pointer; padding: 0.2rem 0.5rem; border-radius: 4px; transition: color 0.2s;" title="Like">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                                    </svg>
-                                    <span class="like-count">${p.totalLikes || 0}</span>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flex-shrink-0 order-1 order-sm-2 mb-3 mb-sm-0">
-                        <img src="${bannerUrl}" alt="${p.title}" style="width: 100%; max-width: 150px; height: 130px; object-fit: cover; border-radius: 8px; background: #1b202a; display: block;">
-                    </div>
-                `;
-
-                $card.html(cardHtml);
-                $list.append($card);
+                $list.append(buildCard(p)); // 👉 dùng buildCard từ posts.js
             });
+
         }).fail(function() {
             $('#blog-list-container').html('<div class="text-danger mt-4">Không thể tải danh sách bài viết.</div>');
         });
     }
-
     // ==========================================
     // 3. LOGIC MODAL & DANH SÁCH FOLLOW
     // ==========================================

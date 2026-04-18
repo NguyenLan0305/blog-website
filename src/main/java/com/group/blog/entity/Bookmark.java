@@ -32,6 +32,7 @@ public class Bookmark {
     @org.hibernate.annotations.OnDelete(action = org.hibernate.annotations.OnDeleteAction.CASCADE)
     Blog blog;
 
+    // thời điểm lưu
     LocalDateTime createdAt;
 
     @PrePersist

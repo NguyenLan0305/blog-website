@@ -27,7 +27,6 @@ public class User {
     String email;
     String bio;
 
-    @Column(columnDefinition = "LONGTEXT")
     String avatarUrl;
     LocalDateTime createdAt;
 

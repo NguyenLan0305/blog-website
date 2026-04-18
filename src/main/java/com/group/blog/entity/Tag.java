@@ -24,6 +24,7 @@ public class Tag {
 
     @Column(nullable = false, unique = true,length = 100)
     String name;
+
     @ManyToMany(mappedBy = "tags")
     @Builder.Default
     Set<Blog> blogs = new HashSet<>();
